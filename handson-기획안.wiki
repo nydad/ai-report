@@ -41,7 +41,7 @@ h2. 2. 프로그램 목적
 * AI 확대 시 관리자에게 요구되는 역량은 어떻게 달라지는가
 
 {panel:title=프로그램 목표|titleBGColor=#1428A0|titleColor=#ffffff|bgColor=#EEF2FF|borderColor=#1428A0}
-무엇을 해야 한다가 아니라, *판단할 수 있는 상태를 만드는 것*이 목표입니다.
+지시가 아닌 경험을 통해 — *리더진 스스로 판단 기준을 갖추는 것*이 이 프로그램의 목표입니다.
 {panel}
 
 ----
