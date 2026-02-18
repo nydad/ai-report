@@ -91,8 +91,8 @@ h2. 4. 기대 산출물
 
 h2. 5. 확산 여건
 
-AI를 적극적으로 활용하는 구성원이 이미 있지만, 확산은 아직 개인의 선의에 기대고 있습니다.
+AI를 적극적으로 활용하는 구성원이 이미 있지만, 지금은 별도의 체계 없이 개인의 관심과 선의에 기대고 있는 구조입니다.
 
-{panel:title=함께 논의할 부분|titleBGColor=#4A6FA5|titleColor=#ffffff|bgColor=#F2F5FA|borderColor=#7A9BC5|borderWidth=1}
-AI 활용이 *업무의 일부*로 자리잡기 위한 동기부여 체계는, 이 프로그램과 별도로 논의가 필요한 부분입니다.
+{panel:title=동기부여 환경|titleBGColor=#4A6FA5|titleColor=#ffffff|bgColor=#F2F5FA|borderColor=#7A9BC5|borderWidth=1}
+개인의 관심이 조직의 흐름으로 이어지려면, 어떤 형태로든 동기부여 환경에 대한 고민이 자연스럽게 따라오게 됩니다.
 {panel}
