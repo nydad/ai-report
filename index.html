@@ -1051,31 +1051,19 @@ button:focus-visible {
       2024년 노벨 화학상이 AI 단백질 구조 예측 연구(Google DeepMind의 AlphaFold 등)에 돌아간 데 이어, 2025~2026년에는 AI가 기존 지식의 정리를 넘어 <strong>새로운 지식을 창출</strong>하기 시작했습니다. GPT-5.2는 이론 물리학에서 새로운 공식을 도출하고 <span class="big-num">12시간</span> 만에 자체 증명을 완성했으며, Gemini 3.0 Deep Think은 코딩 경진대회(Codeforces)에서 전 세계 상위 <span class="big-num">8등</span> 수준을 기록했습니다.
     </p>
 
-    <h3>7.3 우리와의 접점 — 메모리 수요의 구조적 전환</h3>
+    <h3>7.3 우리와의 접점 — 수요 구조의 전환</h3>
     <p>
-      텍스트 LLM 시대에서 데이터센터의 메모리 수요는 선형적으로 증가해왔습니다. 모델이 커지고 사용자가 늘어도, 입력과 출력이 텍스트인 한 스토리지 부하의 증가는 예측 가능한 범위 안에 있었습니다. 이 구조가 근본적으로 바뀌고 있습니다.
+      AI가 스토리지 수요를 키우고 있다는 것은 우리가 가장 잘 아는 이야기입니다. 여기서 짚고 싶은 것은 수요의 크기가 아니라 <strong>수요의 성격이 바뀌고 있다</strong>는 점입니다.
     </p>
-
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr><th>단계</th><th>텍스트 LLM</th><th>영상·멀티모달 AI</th><th>배율</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>훈련 데이터</td><td>수십~수백 PB</td><td>수백~수천 PB</td><td class="num">10배+</td></tr>
-          <tr><td>추론 시 리소스</td><td>기준 1x</td><td>~10x</td><td class="num">10배</td></tr>
-          <tr><td>생성물 크기</td><td>수 KB</td><td>수백 MB~수 GB</td><td class="num">수만 배</td></tr>
-          <tr><td>KV 캐시 (추론 중 임시 메모리)</td><td>수 GB</td><td>수백 GB~TB급</td><td class="num">수십~수백 배</td></tr>
-        </tbody>
-      </table>
-    </div>
-
     <p>
-      텍스트를 생성하는 것과 영상을 생성하는 것은 리소스 차원이 다릅니다. Seedance 2.0 같은 영상 생성 모델이 확산될수록, 훈련·추론·저장의 모든 단계에서 스토리지 소요가 폭증합니다. NVIDIA의 차세대 AI 플랫폼이 대규모 KV 캐시를 GPU HBM이 아닌 SSD 기반 플래시 스토리지로 오프로드하는 구조를 채택한 것은, 이 수요 곡선이 HBM만으로는 감당할 수 없는 규모로 진입하고 있다는 신호입니다.
+      텍스트 LLM의 응답 한 건은 약 4KB입니다. 현재 영상 생성 AI가 만들어내는 1080p 10초 클립은 평균 20~30MB — 단일 산출물 기준으로 <strong>수천 배</strong>이며, 해상도와 길이가 올라가면 수만 배 이상으로 벌어집니다. 여기에 학습 데이터의 규모, 추론 중 KV 캐시, 생성물의 저장·전송까지 더하면, 텍스트 시대와는 부하의 차수(order) 자체가 다릅니다. Gartner는 GenAI 솔루션 중 멀티모달 비중이 2023년 1%에서 2027년 <span class="big-num">40%</span>로 확대될 것으로 예측하고 있습니다 — 텍스트 중심이었던 수요 구조가 영상·멀티모달로 이동하는 것입니다.
+    </p>
+    <p>
+      NVIDIA가 CES 2026에서 발표한 <strong>ICMS(Inference Context Memory Storage Platform)</strong>는 이 전환의 구체적 신호입니다. KV 캐시를 HBM에만 담지 않고 DRAM과 NVMe SSD로 계층화하여 페타바이트 규모까지 확장하는 구조인데, Dell·HPE·IBM·Pure Storage 등 12개 파트너가 참여하고 2026년 하반기 출시 예정입니다. 추론 인프라에서 스토리지의 역할이 공식적으로 재정의되는 시점입니다.
     </p>
 
     <div class="callout key">
-      LLM이 데이터센터의 메모리 수요를 선형적으로 키웠다면, 월드 모델(World Model — 물리 법칙·공간·시간을 이해하고 시뮬레이션하는 AI)과 영상 AI는 그것을 지수적으로 키우는 구조입니다. AI가 발전할수록 메모리 수요가 함께 증가하는 경향은 당분간 지속될 가능성이 높습니다.
+      LLM이 데이터센터의 메모리 수요를 선형적으로 키웠다면, 영상·멀티모달 AI는 그 곡선의 기울기를 바꾸고 있습니다. 여기에 월드 모델(World Model — 물리 법칙·공간·시간을 이해하고 시뮬레이션하는 AI)까지 본격화되면, 이 증가세는 더 가속될 수 있습니다.
     </div>
 
   </div>
@@ -1276,6 +1264,8 @@ button:focus-visible {
           <tr><td>"AI Doesn't Reduce Work — It Intensifies It"</td><td>Harvard Business Review (2026.2)</td><td>6.4</td></tr>
           <tr><td>METR — AI Impact on Experienced OS Dev Productivity (RCT)</td><td>METR (2025.7)</td><td>6.4</td></tr>
           <tr><td>LeadDev — Junior Developer Hiring Survey</td><td>LeadDev (2025)</td><td>6.5</td></tr>
+          <tr><td>NVIDIA ICMS Platform / BlueField-4 발표</td><td>NVIDIA (CES 2026.1)</td><td>7.3</td></tr>
+          <tr><td>GenAI 멀티모달 비중 전망 (1% → 40%)</td><td>Gartner (2024.9)</td><td>7.3</td></tr>
         </tbody>
       </table>
     </div>
