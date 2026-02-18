@@ -801,10 +801,72 @@ button:focus-visible {
       이 변화는 설문이 아니라 실제 산출물에서도 확인됩니다. FT(Financial Times) 분석에 따르면, 2022~2023년 거의 제로 성장이었던 지표들이 2024년 말부터 가파르게 상승하고 있습니다.
     </p>
 
-    <div style="margin: 32px 0; border: 1px solid var(--border); overflow: hidden;">
-      <img src="assets/coding-productivity.jpg" alt="AI 코딩 생산성 지표 — 신규 웹사이트, iOS 앱, GitHub 코드 push YoY 성장" style="width: 100%; display: block;">
+    <div style="margin: 32px 0; border: 1px solid var(--border); background: #fff; padding: 20px 20px 12px;">
+      <p style="font-size: 14px; font-weight: 700; color: #111; margin: 0 0 2px; line-height: 1.4; font-family: sans-serif;">The past year has seen an explosion in coding productivity</p>
+      <p style="font-size: 11px; color: #666; margin: 0 0 12px; font-family: sans-serif;">Year-on-year growth in various indicators of coding output</p>
+      <div style="display: flex; align-items: flex-start;">
+        <div style="flex: 1 1 0; min-width: 0;">
+          <svg viewBox="0 0 185 150" xmlns="http://www.w3.org/2000/svg" style="width: 100%; display: block; overflow: visible;">
+            <text x="30" y="13" font-size="9" font-weight="700" fill="#111" font-family="sans-serif">New websites</text>
+            <text x="27" y="54" font-size="7.5" fill="#999" text-anchor="end" font-family="sans-serif">+40%</text>
+            <text x="27" y="86" font-size="7.5" fill="#999" text-anchor="end" font-family="sans-serif">+20%</text>
+            <text x="27" y="118" font-size="7.5" fill="#999" text-anchor="end" font-family="sans-serif">+0%</text>
+            <line x1="30" y1="50" x2="180" y2="50" stroke="#e8e8e8" stroke-width="0.5"/>
+            <line x1="30" y1="82" x2="180" y2="82" stroke="#e8e8e8" stroke-width="0.5"/>
+            <line x1="30" y1="114" x2="180" y2="114" stroke="#bbb" stroke-width="0.7"/>
+            <polygon points="30,114 30,106 39,101 48,108 58,114 67,117 76,109 85,104 94,100 104,95 113,92 122,88 131,82 140,72 149,66 159,61 168,56 177,60 180,58 180,114" fill="#b8cfe0" opacity="0.55"/>
+            <polyline points="30,106 39,101 48,108 58,114 67,117 76,109 85,104 94,100 104,95 113,92 122,88 131,82 140,72 149,66 159,61 168,56 177,60 180,58" fill="none" stroke="#1a3e6e" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+            <circle cx="180" cy="58" r="3.5" fill="#1a3e6e"/>
+            <text x="30" y="143" font-size="7.5" fill="#999" text-anchor="middle" font-family="sans-serif">2022</text>
+            <text x="104" y="143" font-size="7.5" fill="#999" text-anchor="middle" font-family="sans-serif">2024</text>
+            <text x="177" y="143" font-size="7.5" fill="#999" text-anchor="middle" font-family="sans-serif">2026</text>
+          </svg>
+        </div>
+        <div style="flex: 1 1 0; min-width: 0;">
+          <svg viewBox="0 0 165 150" xmlns="http://www.w3.org/2000/svg" style="width: 100%; display: block; overflow: visible;">
+            <text x="5" y="13" font-size="9" font-weight="700" fill="#111" font-family="sans-serif">New iOS apps</text>
+            <line x1="5" y1="50" x2="160" y2="50" stroke="#e8e8e8" stroke-width="0.5"/>
+            <line x1="5" y1="82" x2="160" y2="82" stroke="#e8e8e8" stroke-width="0.5"/>
+            <line x1="5" y1="114" x2="160" y2="114" stroke="#bbb" stroke-width="0.7"/>
+            <polygon points="5,114 5,106 15,95 24,108 33,122 43,122 52,112 62,117 71,103 81,95 90,104 100,85 109,74 119,53 128,31 138,47 147,37 157,44 160,26 160,114" fill="#b8cfe0" opacity="0.55"/>
+            <polyline points="5,106 15,95 24,108 33,122 43,122 52,112 62,117 71,103 81,95 90,104 100,85 109,74 119,53 128,31 138,47 147,37 157,44 160,26" fill="none" stroke="#1a3e6e" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+            <circle cx="160" cy="26" r="3.5" fill="#1a3e6e"/>
+            <text x="5" y="143" font-size="7.5" fill="#999" text-anchor="middle" font-family="sans-serif">2022</text>
+            <text x="81" y="143" font-size="7.5" fill="#999" text-anchor="middle" font-family="sans-serif">2024</text>
+            <text x="157" y="143" font-size="7.5" fill="#999" text-anchor="middle" font-family="sans-serif">2026</text>
+          </svg>
+        </div>
+        <div style="flex: 1 1 0; min-width: 0;">
+          <svg viewBox="0 0 165 150" xmlns="http://www.w3.org/2000/svg" style="width: 100%; display: block; overflow: visible;">
+            <text x="5" y="13" font-size="9" font-weight="700" fill="#111" font-family="sans-serif">GitHub code: US</text>
+            <line x1="5" y1="50" x2="160" y2="50" stroke="#e8e8e8" stroke-width="0.5"/>
+            <line x1="5" y1="82" x2="160" y2="82" stroke="#e8e8e8" stroke-width="0.5"/>
+            <line x1="5" y1="114" x2="160" y2="114" stroke="#bbb" stroke-width="0.7"/>
+            <polygon points="5,114 5,111 15,106 24,109 33,111 43,109 52,108 62,109 71,106 81,104 90,100 100,95 109,85 119,76 128,69 138,66 147,68 157,63 160,66 160,114" fill="#b8cfe0" opacity="0.55"/>
+            <polyline points="5,111 15,106 24,109 33,111 43,109 52,108 62,109 71,106 81,104 90,100 100,95 109,85 119,76 128,69 138,66 147,68 157,63 160,66" fill="none" stroke="#1a3e6e" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+            <circle cx="160" cy="66" r="3.5" fill="#1a3e6e"/>
+            <text x="5" y="143" font-size="7.5" fill="#999" text-anchor="middle" font-family="sans-serif">2022</text>
+            <text x="81" y="143" font-size="7.5" fill="#999" text-anchor="middle" font-family="sans-serif">2024</text>
+            <text x="157" y="143" font-size="7.5" fill="#999" text-anchor="middle" font-family="sans-serif">2026</text>
+          </svg>
+        </div>
+        <div style="flex: 1 1 0; min-width: 0;">
+          <svg viewBox="0 0 165 150" xmlns="http://www.w3.org/2000/svg" style="width: 100%; display: block; overflow: visible;">
+            <text x="5" y="13" font-size="9" font-weight="700" fill="#111" font-family="sans-serif">GitHub code: UK</text>
+            <line x1="5" y1="50" x2="160" y2="50" stroke="#e8e8e8" stroke-width="0.5"/>
+            <line x1="5" y1="82" x2="160" y2="82" stroke="#e8e8e8" stroke-width="0.5"/>
+            <line x1="5" y1="114" x2="160" y2="114" stroke="#bbb" stroke-width="0.7"/>
+            <polygon points="5,114 5,104 15,98 24,101 33,103 43,100 52,97 62,100 71,98 81,100 90,98 100,97 109,92 119,87 128,82 138,79 147,80 157,76 160,74 160,114" fill="#b8cfe0" opacity="0.55"/>
+            <polyline points="5,104 15,98 24,101 33,103 43,100 52,97 62,100 71,98 81,100 90,98 100,97 109,92 119,87 128,82 138,79 147,80 157,76 160,74" fill="none" stroke="#1a3e6e" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+            <circle cx="160" cy="74" r="3.5" fill="#1a3e6e"/>
+            <text x="5" y="143" font-size="7.5" fill="#999" text-anchor="middle" font-family="sans-serif">2022</text>
+            <text x="81" y="143" font-size="7.5" fill="#999" text-anchor="middle" font-family="sans-serif">2024</text>
+            <text x="157" y="143" font-size="7.5" fill="#999" text-anchor="middle" font-family="sans-serif">2026</text>
+          </svg>
+        </div>
+      </div>
+      <p style="font-size: 9px; color: #999; margin: 6px 0 0; line-height: 1.5; font-family: sans-serif;">Sources: Domain Name Industry Brief; SensorTower; GitHub. GitHub data is quarterly pushes &nbsp;·&nbsp; FT graphic: John Burn-Murdoch / @jburnmurdoch &copy;FT</p>
     </div>
-    <p class="source-note">출처: FT / John Burn-Murdoch (2026.2)</p>
 
     <h3>3.2 변화의 속도</h3>
 
@@ -1061,6 +1123,7 @@ button:focus-visible {
     <div class="callout key">
       LLM이 데이터센터의 메모리 수요를 선형적으로 키웠다면, 월드 모델(World Model — 물리 법칙·공간·시간을 이해하고 시뮬레이션하는 AI)과 영상 AI는 그것을 지수적으로 키우는 구조입니다. AI가 발전할수록 메모리 수요가 함께 증가하는 경향은 당분간 지속될 가능성이 높습니다.
     </div>
+
   </div>
 </section>
 
