@@ -1,0 +1,41 @@
+<svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .bg { fill: #0A0A0F; }
+    .text { font-family: 'JetBrains Mono', monospace; fill: #E0E8F0; font-size: 24px; font-weight: bold; }
+    .subtext { font-family: sans-serif; fill: #6A7080; font-size: 16px; }
+    .accent { stroke: #5A9CFF; stroke-width: 2; fill: none; }
+    .box { fill: #18181B; stroke: #3F3F46; stroke-width: 2; }
+    .box-active { fill: #1428A0; stroke: #5A9CFF; stroke-width: 3; }
+    .line { stroke: #52525B; stroke-width: 2; stroke-dasharray: 4; }
+  </style>
+
+  <!-- Background -->
+  <rect width="100%" height="100%" class="bg"/>
+
+  <!-- Left: Model / NAND -->
+  <g transform="translate(100, 100)">
+    <rect x="0" y="0" width="240" height="200" rx="8" class="box" />
+    <text x="120" y="100" text-anchor="middle" class="text" fill="#A0A8B8">MODEL</text>
+    <text x="120" y="130" text-anchor="middle" class="subtext">NAND Flash</text>
+    <path d="M40,60 H200 M40,80 H200 M40,100 H200 M40,120 H200 M40,140 H200" stroke="#27272A" stroke-width="2"/>
+  </g>
+
+  <!-- Connection lines -->
+  <line x1="340" y1="200" x2="460" y2="200" class="line" />
+  <circle cx="400" cy="200" r="12" fill="#0A0A0F" stroke="#5A9CFF" stroke-width="2"/>
+  <text x="400" y="205" text-anchor="middle" alignment-baseline="middle" fill="#5A9CFF" font-size="14" font-family="monospace">×</text>
+
+  <!-- Right: Agent / Firmware -->
+  <g transform="translate(460, 100)">
+    <rect x="0" y="0" width="240" height="200" rx="8" class="box-active" />
+    <path d="M20,20 H220 M20,180 H220 M20,20 V180 M220,20 V180" class="accent" opacity="0.3"/>
+    <circle cx="120" cy="80" r="30" fill="none" class="accent"/>
+    <path d="M120,50 V55 M120,105 V110 M90,80 H95 M145,80 H150" class="accent"/>
+    
+    <text x="120" y="160" text-anchor="middle" class="text" fill="#fff">AGENT</text>
+    <text x="120" y="185" text-anchor="middle" class="subtext" fill="#8AB8FF">Firmware / Controller</text>
+  </g>
+
+  <!-- Title -->
+  <text x="400" y="50" text-anchor="middle" class="text" font-size="28" fill="#fff">Structure of Performance</text>
+</svg>

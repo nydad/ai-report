@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phase Change — AI Agent Era Baseline Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #16162A;
+    color: #E0E0F0;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+.deck {
+    display: flex;
+    /* NO transition — instant page change */
+}
+
+.slide {
+    min-width: 100vw;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 4vh 8vw;
+    background: #16162A;
+    box-sizing: border-box;
+    overflow-y: auto;
+    text-align: center;
+}
+
+/* 슬라이드 배경 변형 */
+.slide.s01 { background: #18203A; }
+.slide.s02 { background: #2A1420; }
+.slide.s03 { background: #162232; }
+.slide.s04 { background: #1C1A3A; }
+.slide.s05 { background: #221638; }
+.slide.s06 { background: #281E08; }
+.slide.s07 { background: #122A1E; }
+.slide.s08 { background: #281E08; }
+.slide.s09 { background: #16162E; }
+.slide.s10 { background: #182038; }
+.slide.dark { background: #1E1E2E; }
+.slide.darker { background: #18182A; }
+
+/* 타이포그래피 */
+.eyebrow {
+    font-size: clamp(0.65rem, 0.8vw, 0.78rem);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #7070A8;
+    margin-bottom: 2vh;
+    font-weight: 500;
+}
+
+h1 {
+    font-size: clamp(3rem, 7vw, 6rem);
+    font-weight: 900;
+    text-align: center;
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    color: #EEF0FF;
+}
+
+h2 {
+    font-size: clamp(2rem, 4.5vw, 3.8rem);
+    font-weight: 800;
+    text-align: center;
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+    color: #EEF0FF;
+}
+
+h3 {
+    font-size: clamp(1.4rem, 2.8vw, 2.2rem);
+    font-weight: 700;
+    text-align: center;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    margin-bottom: 2vh;
+    color: #EEF0FF;
+}
+
+.sub {
+    font-size: clamp(1rem, 1.8vw, 1.5rem);
+    color: #9090C0;
+    margin-top: 1.5vh;
+    text-align: center;
+    line-height: 1.65;
+    font-weight: 400;
+    max-width: 72vw;
+}
+
+.meta {
+    margin-top: 2.5vh;
+    font-size: clamp(0.7rem, 0.9vw, 0.85rem);
+    color: #5A5A80;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    text-align: center;
+}
+
+/* 강조 색상 */
+.blue { color: #4A7CFF; }
+.green { color: #2ABD7A; }
+.amber { color: #D4A017; }
+.red { color: #E05050; }
+.muted { color: #9090A8; }
+
+/* 섹션 헤더 스타일 */
+.section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(0.7rem, 0.85vw, 0.8rem);
+    letter-spacing: 0.2em;
+    color: rgba(255,255,255,0.3);
+    margin-bottom: 1.5vh;
+    text-transform: uppercase;
+}
+
+/* 카드 그리드 */
+.cards {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 84vw;
+    margin: 2vh auto;
+}
+
+.card {
+    background: #24243A;
+    border: 1px solid #2E2E46;
+    border-radius: 12px;
+    padding: 26px 30px;
+    min-width: 200px;
+    max-width: 320px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+}
+
+.card.fill-blue { background: #121E3E; border-color: #2A4080; }
+.card.fill-green { background: #0E221A; border-color: #1E5A3A; }
+.card.fill-amber { background: #22180A; border-color: #5A400A; }
+.card.fill-red { background: #220A0A; border-color: #5A1818; }
+
+.card-label {
+    font-size: clamp(0.62rem, 0.75vw, 0.72rem);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #7070A0;
+    font-weight: 600;
+}
+.card.fill-blue .card-label,
+.card.fill-green .card-label,
+.card.fill-amber .card-label,
+.card.fill-red .card-label { color: rgba(255,255,255,0.4); }
+
+.card-value {
+    font-size: clamp(1.05rem, 1.7vw, 1.4rem);
+    font-weight: 700;
+    line-height: 1.4;
+    color: #E0E8F4;
+}
+
+/* 스탯 카드 */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    max-width: 84vw;
+    margin: 2vh auto;
+}
+
+.stat {
+    background: #1E1E32;
+    border: 1px solid #2A2A42;
+    border-top: 2px solid #4A7CFF;
+    padding: 24px 16px;
+    text-align: center;
+    border-radius: 10px;
+}
+
+.stat-n {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(1.8rem, 3.5vw, 3rem);
+    font-weight: 900;
+    color: #4A7CFF;
+    line-height: 1.1;
+}
+
+.stat-l {
+    font-size: clamp(0.65rem, 0.82vw, 0.78rem);
+    color: #8080A8;
+    margin-top: 8px;
+    line-height: 1.5;
+}
+
+/* 인용 박스 — no border-left */
+.qbox {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 2vh 3vw;
+    margin: 1.5vh auto;
+    max-width: 76vw;
+    text-align: center;
+}
+.qbox p {
+    font-size: clamp(0.88rem, 1.1vw, 1rem);
+    color: #C8D0E0;
+    line-height: 1.75;
+}
+/* qbox 색상 변형 */
+.qbox.amber {
+    background: rgba(212,160,23,0.07);
+    border-color: rgba(212,160,23,0.22);
+}
+.qbox.amber p { color: #D4A017; }
+.qbox.green {
+    background: rgba(42,189,122,0.06);
+    border-color: rgba(42,189,122,0.2);
+}
+.qbox.green p { color: #2ABD7A; }
+.qbox.red {
+    background: rgba(224,80,80,0.07);
+    border-color: rgba(224,80,80,0.22);
+}
+.qbox.red p { color: #E07070; }
+
+/* 큰 인용문 */
+.bigquote {
+    font-size: clamp(1.2rem, 2.2vw, 1.8rem);
+    font-weight: 400;
+    max-width: 72vw;
+    text-align: center;
+    line-height: 1.75;
+    color: #E0E0EE;
+    font-style: italic;
+}
+.bigquote cite {
+    display: block;
+    margin-top: 20px;
+    font-size: clamp(0.7rem, 0.85vw, 0.8rem);
+    color: rgba(255,255,255,0.28);
+    font-style: normal;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+/* 경고/팁 — no border-left */
+.warn {
+    background: rgba(212,160,23,0.07);
+    border: 1px solid rgba(212,160,23,0.22);
+    border-radius: 12px;
+    padding: 1.6vh 3vw;
+    margin: 1.2vh auto;
+    max-width: 76vw;
+    text-align: center;
+}
+.warn p { color: #D4A017; font-size: clamp(0.85rem, 1.05vw, 0.95rem); line-height: 1.6; font-weight: 500; }
+
+.tip {
+    background: rgba(42,189,122,0.06);
+    border: 1px solid rgba(42,189,122,0.2);
+    border-radius: 12px;
+    padding: 1.6vh 3vw;
+    margin: 1.2vh auto;
+    max-width: 76vw;
+    text-align: center;
+}
+.tip p { color: #2ABD7A; font-size: clamp(0.85rem, 1.05vw, 0.95rem); line-height: 1.6; font-weight: 500; }
+
+/* 리스트 */
+.klist {
+    list-style: none;
+    max-width: 78vw;
+    width: 100%;
+    text-align: left;
+    margin: 0 auto;
+}
+.klist li {
+    font-size: clamp(0.92rem, 1.3vw, 1.15rem);
+    padding: 1.1vh 1.5vw;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    color: #B8C4D4;
+    line-height: 1.65;
+}
+.klist li:last-child { border-bottom: none; }
+.klist li strong { color: #E0E8F4; font-weight: 700; }
+
+/* 타임라인 */
+.timeline {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    max-width: 88vw;
+    margin: 2vh auto;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.tl-step {
+    background: #22223A;
+    border: 1px solid #2E2E4A;
+    border-radius: 8px;
+    padding: 14px 18px;
+    text-align: center;
+    min-width: 120px;
+}
+.tl-step.current {
+    background: #162040;
+    border-color: #4A7CFF;
+}
+.tl-step.future { opacity: 0.45; }
+.tl-year {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(0.72rem, 0.88vw, 0.84rem);
+    color: #4A7CFF;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 4px;
+}
+.tl-step.current .tl-year { color: #7AAAFF; }
+.tl-desc-s {
+    font-size: clamp(0.68rem, 0.82vw, 0.78rem);
+    color: #8090A8;
+    line-height: 1.4;
+}
+.tl-arrow {
+    color: #3A3A60;
+    font-size: 1.2rem;
+    padding: 0 6px;
+    flex-shrink: 0;
+}
+
+/* 존 그리드 (A/B/C) */
+.zones {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 78vw;
+    margin: 1.5vh auto;
+    width: 100%;
+}
+.zone-item {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 18px 28px;
+    border-radius: 12px;
+    border: 1px solid;
+    text-align: left;
+}
+.zone-item.a { background: rgba(42,189,122,0.05); border-color: rgba(42,189,122,0.2); }
+.zone-item.b { background: rgba(212,160,23,0.05); border-color: rgba(212,160,23,0.2); }
+.zone-item.c { background: rgba(224,80,80,0.05); border-color: rgba(224,80,80,0.2); }
+.zone-lbl {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.6rem;
+    font-weight: 900;
+}
+.zone-item.a .zone-lbl { color: #2ABD7A; }
+.zone-item.b .zone-lbl { color: #D4A017; }
+.zone-item.c .zone-lbl { color: #E05050; }
+.zone-title { font-size: clamp(0.82rem, 1vw, 0.94rem); font-weight: 700; color: #E0E8F4; margin-bottom: 4px; }
+.zone-ex { font-size: clamp(0.74rem, 0.88vw, 0.84rem); color: #7878A8; line-height: 1.55; }
+
+/* 테이블 */
+.tbl {
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 84vw;
+    margin: 1.5vh auto;
+    font-size: clamp(0.82rem, 1vw, 0.95rem);
+}
+.tbl th {
+    padding: 12px 18px;
+    text-align: left;
+    color: #7070A0;
+    font-weight: 600;
+    font-size: clamp(0.65rem, 0.8vw, 0.74rem);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.tbl td {
+    padding: 12px 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    color: #B0BCD0;
+    vertical-align: top;
+    line-height: 1.55;
+    text-align: left;
+}
+.tbl tr:last-child td { border-bottom: none; }
+.tbl td:first-child { color: #D8E0F0; font-weight: 600; }
+.num { font-family: 'JetBrains Mono', monospace; color: #6A9CFF; font-weight: 700; }
+
+/* 공식 박스 */
+.formula-box {
+    background: rgba(74,124,255,0.08);
+    border: 1px solid rgba(74,124,255,0.25);
+    border-radius: 14px;
+    padding: 3vh 4vw;
+    text-align: center;
+    max-width: 68vw;
+    margin: 2vh auto;
+}
+.formula-main {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(1.2rem, 2.2vw, 1.8rem);
+    font-weight: 700;
+    color: #E8E8F2;
+    margin-bottom: 10px;
+}
+.formula-note {
+    font-size: clamp(0.75rem, 0.9vw, 0.85rem);
+    color: #6A8AC0;
+    line-height: 1.5;
+}
+
+/* TOC 그리드 */
+.toc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    max-width: 72vw;
+    width: 100%;
+    margin: 2.5vh auto;
+}
+.toc-item {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    padding: 12px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.toc-n {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(0.68rem, 0.82vw, 0.78rem);
+    color: #4A7CFF;
+    font-weight: 700;
+    min-width: 24px;
+}
+.toc-t {
+    font-size: clamp(0.82rem, 1vw, 0.92rem);
+    color: #9090C0;
+}
+
+/* 네비게이션 */
+.nav {
+    position: fixed;
+    bottom: 28px;
+    left: 40px;
+    display: flex;
+    gap: 10px;
+    z-index: 100;
+}
+.nav button {
+    width: 44px; height: 44px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: #5A5A80;
+    font-size: 17px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.15s;
+}
+.nav button:hover { border-color: #4A7CFF; color: #6A9CFF; background: rgba(74,124,255,0.1); }
+
+.pnum {
+    position: fixed;
+    bottom: 28px;
+    right: 40px;
+    font-size: 0.75rem;
+    color: #4A4A70;
+    font-family: 'JetBrains Mono', monospace;
+    z-index: 100;
+}
+
+.part-label {
+    position: fixed;
+    top: 28px;
+    left: 40px;
+    font-size: 0.68rem;
+    color: #3A3A60;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    z-index: 100;
+}
+</style>
+</head>
+<body>
+
+<div class="part-label">Phase Change · AI Agent Era</div>
+
+<div class="deck" id="deck">
+
+<!-- ========== SLIDE 01: COVER ========== -->
+<div class="slide s01">
+    <div class="eyebrow">AI Agent Era · Baseline Report · 2026.2</div>
+    <h1>Phase Change</h1>
+    <div class="sub">들어서 아는 것과<br>경험하는 것의 차이</div>
+    <div class="meta">김학민 · SE P/J · 2026.02</div>
+</div>
+
+<!-- ========== SLIDE 02: TOC ========== -->
+<div class="slide dark">
+    <div class="eyebrow">Table of Contents</div>
+    <div class="toc-grid">
+        <div class="toc-item"><span class="toc-n">01</span><span class="toc-t">리포트 작성 배경</span></div>
+        <div class="toc-item"><span class="toc-n">06</span><span class="toc-t">역할의 변화</span></div>
+        <div class="toc-item"><span class="toc-n">02</span><span class="toc-t">시장 반응 — SaaSpocalypse</span></div>
+        <div class="toc-item"><span class="toc-n">07</span><span class="toc-t">코딩을 넘어</span></div>
+        <div class="toc-item"><span class="toc-n">03</span><span class="toc-t">업계 기준선</span></div>
+        <div class="toc-item"><span class="toc-n">08</span><span class="toc-t">기술적 가능성 vs 현실 제약</span></div>
+        <div class="toc-item"><span class="toc-n">04</span><span class="toc-t">핵심 개념 — Model ≠ Agent</span></div>
+        <div class="toc-item"><span class="toc-n">09</span><span class="toc-t">과제</span></div>
+        <div class="toc-item"><span class="toc-n">05</span><span class="toc-t">패러다임 전환</span></div>
+        <div class="toc-item"><span class="toc-n">10</span><span class="toc-t">향후 논의가 필요한 질문들</span></div>
+    </div>
+</div>
+
+<!-- ========== SLIDE 03: SECTION 01 HEADER ========== -->
+<div class="slide s01">
+    <div class="section-num">Section 01</div>
+    <h1>리포트<br>작성 배경</h1>
+    <div class="sub">왜 지금, 이 리포트인가</div>
+</div>
+
+<!-- ========== SLIDE 04: 조사시찰단 ========== -->
+<div class="slide dark">
+    <div class="eyebrow">1881년 · 조선</div>
+    <h3>조사시찰단 62명</h3>
+    <div class="sub" style="margin-bottom:2vh">위정척사운동이 거셀 때<br><span class="blue">비밀리에</span> 일본에 파견</div>
+    <div class="qbox" style="max-width:72vw;">
+        <p>전신선·증기선·근대식 군대를 <strong>직접 걸어 다니며</strong> 목격한 3개월<br>귀국 후 하나같이 "근대신제도 도입이 시급하다" 보고</p>
+    </div>
+    <div class="tip" style="margin-top:2vh;"><p>진짜 갈림길은 수용이냐 거부냐가 아니라 — 실체를 직접 확인했느냐 아니냐의 차이</p></div>
+</div>
+
+<!-- ========== SLIDE 05: 이 리포트의 목적 ========== -->
+<div class="slide dark">
+    <div class="eyebrow">리포트 목적</div>
+    <h3>2026년 2월, 바깥이 어디까지 와 있는지</h3>
+    <div class="cards" style="margin-top:2.5vh;">
+        <div class="card">
+            <div class="card-label">사내 교육</div>
+            <div class="card-value">업계 기준선 형성<br>핵심 개념·패러다임 정리</div>
+        </div>
+        <div class="card fill-blue">
+            <div class="card-label">사외 Hands-on</div>
+            <div class="card-value">직접 체험<br>경험 기반 판단</div>
+        </div>
+    </div>
+    <div class="sub" style="margin-top:2vh;font-size:clamp(0.85rem,1.1vw,1rem);">본 자료의 판단 기준: Jensen Huang, Karpathy, Amodei, Andrew Ng, Hassabis 등<br>AI 최전선 인물들의 공개 발언 + 공식 보고서</div>
+</div>
+
+<!-- ========== SLIDE 06: SECTION 02 HEADER ========== -->
+<div class="slide s02">
+    <div class="section-num">Section 02</div>
+    <h1>SaaSpocalypse</h1>
+    <div class="sub">SaaS + Apocalypse · 2026.2</div>
+</div>
+
+<!-- ========== SLIDE 07: Something Big ========== -->
+<div class="slide dark">
+    <div class="eyebrow">Matt Shumer · OthersideAI CEO · Fortune · 2026.2.11</div>
+    <h3>"Something Big<br>is Happening"</h3>
+    <div class="qbox" style="margin-top:1.5vh;">
+        <p>원하는 것을 평문으로 설명하고 <strong>4시간 후 돌아오면</strong>—<br>수만 줄의 코드가 작성되어 있고, AI가 스스로 앱을 열어 버튼을 클릭하며 테스트한 뒤,<br>자체 기준을 충족했을 때만 <span class="blue">"준비되었습니다"</span>라고 보고합니다</p>
+    </div>
+    <div class="stats" style="grid-template-columns:1fr;max-width:40vw;margin-top:2vh;">
+        <div class="stat"><div class="stat-n">6,000만+</div><div class="stat-l">Fortune 기고 조회수</div></div>
+    </div>
+</div>
+
+<!-- ========== SLIDE 08: 2020년 2월 비유 ========== -->
+<div class="slide darker">
+    <div class="bigquote">
+        "2020년 2월. 해외에서 바이러스가 퍼지고 있다는 소식이 들렸지만,<br>화장지를 비축한다는 사람을 보면 과민반응이라고 생각했던 그때.<br>그리고 3주 만에 세상 전체가 바뀌었습니다."
+        <cite>Shumer — "지금이 바로 과장으로 보이는 단계"</cite>
+    </div>
+</div>
+
+<!-- ========== SLIDE 09: 무료 vs 유료 ========== -->
+<div class="slide dark">
+    <div class="eyebrow">인식의 함정</div>
+    <h3>무료 AI로 AI를 판단하면</h3>
+    <div class="warn" style="margin-top:2vh;">
+        <p>무료 버전은 유료 사용자가 접근하는 것보다 <strong>1년 이상 뒤처져</strong> 있습니다</p>
+    </div>
+    <div class="qbox amber" style="margin-top:1.5vh;">
+        <p>"무료 ChatGPT로 AI를 판단하는 것은<br><strong>피처폰으로 스마트폰의 현재를 평가하는 것</strong>과 같습니다"</p>
+    </div>
+    <div class="tip" style="margin-top:1.5vh;"><p>대중의 인식과 현실 사이의 간극 — 이것이 준비를 막는 가장 위험한 요소</p></div>
+</div>
+
+<!-- ========== SLIDE 10: SaaSpocalypse 숫자 ========== -->
+<div class="slide dark">
+    <div class="eyebrow">2026.2.3 — 하루</div>
+    <h3>시장의 반응</h3>
+    <div class="stats" style="grid-template-columns:1fr 1fr;max-width:60vw;margin-top:2.5vh;">
+        <div class="stat"><div class="stat-n">$285B</div><div class="stat-l">소프트웨어 섹터<br>하루 시가총액 소실</div></div>
+        <div class="stat"><div class="stat-n">$1T+</div><div class="stat-l">2026 누적<br>SaaS 섹터 소실</div></div>
+    </div>
+    <div class="qbox" style="margin-top:2vh;"><p>직접 촉매: <strong>Claude Cowork 법률 업무 자동화 플러그인</strong> 출시 (2026.2.3)<br>Salesforce · Adobe · ServiceNow — 대표 SaaS 기업들 유독 큰 낙폭</p></div>
+</div>
+
+<!-- ========== SLIDE 11: SaaS 공식 붕괴 ========== -->
+<div class="slide dark">
+    <div class="eyebrow">20년간의 SaaS 공식</div>
+    <div class="cards" style="margin-top:3vh;">
+        <div class="card">
+            <div class="card-label">기존 공식</div>
+            <div class="card-value">더 많은 직원<br>= 더 많은 라이선스</div>
+        </div>
+        <div class="card fill-red">
+            <div class="card-label">흔들리는 이유</div>
+            <div class="card-value">AI 에이전트 1개<br>= 10명 업무<br><span style="font-size:0.8em;opacity:0.7">→ 10개 시트가 필요한가?</span></div>
+        </div>
+    </div>
+    <div class="tip" style="margin-top:2vh;"><p>주가는 예언이 아니다. 그러나 AI Agent가 이제 '쓰고 판단하는 대상'이 되었다는 신호</p></div>
+</div>
+
+<!-- ========== SLIDE 12: SECTION 03 HEADER ========== -->
+<div class="slide s03">
+    <div class="section-num">Section 03</div>
+    <h1>업계 기준선</h1>
+    <div class="sub">지금 어디까지 와 있는가</div>
+</div>
+
+<!-- ========== SLIDE 13: 4가지 지표 ========== -->
+<div class="slide dark">
+    <div class="eyebrow">채택률 & 생산성 지표</div>
+    <div class="stats" style="margin-top:2.5vh;">
+        <div class="stat"><div class="stat-n">90%+</div><div class="stat-l">개발자 AI 도구<br>채택률</div></div>
+        <div class="stat"><div class="stat-n">90%</div><div class="stat-l">AI 코드 작성 비율<br>전망 (Amodei)</div></div>
+        <div class="stat"><div class="stat-n">110%+</div><div class="stat-l">높은 채택 조직<br>생산성 향상</div></div>
+        <div class="stat"><div class="stat-n">4.4h</div><div class="stat-l">Staff+ 엔지니어<br>주당 시간 절감</div></div>
+    </div>
+    <div class="sub" style="font-size:clamp(0.72rem,0.88vw,0.82rem);margin-top:1.5vh;">2025 DORA · DX Q4 · Jellyfish-OpenAI 공동연구 · Anthropic CEO</div>
+</div>
+
+<!-- ========== SLIDE 14: FT 산출물 분석 ========== -->
+<div class="slide dark">
+    <div class="eyebrow">설문이 아닌 실제 산출물 · FT / John Burn-Murdoch · 2026.2</div>
+    <h3>2024년 말, 숫자가 꺾였다</h3>
+    <img src="assets/coding-productivity.jpg" alt="FT coding productivity chart"
+         style="max-height:52vh;max-width:78vw;object-fit:contain;border-radius:10px;margin-top:2vh;display:block;margin-left:auto;margin-right:auto;">
+    <div class="sub" style="margin-top:1.8vh;font-size:clamp(0.78rem,0.95vw,0.88rem);">신규 웹사이트 · iOS 앱 출시 · GitHub 코드 push — 2022~2023 정체 → 2024년 말부터 급반등</div>
+</div>
+
+<!-- ========== SLIDE 15: 변화의 속도 ========== -->
+<div class="slide dark">
+    <div class="eyebrow">변화의 속도</div>
+    <div class="timeline" style="margin-top:2.5vh;gap:6px;">
+        <div class="tl-step"><span class="tl-year">2023</span><span class="tl-desc-s">코드 자동완성</span></div>
+        <div class="tl-arrow">→</div>
+        <div class="tl-step"><span class="tl-year">2024</span><span class="tl-desc-s">챗 기반<br>코드 생성</span></div>
+        <div class="tl-arrow">→</div>
+        <div class="tl-step"><span class="tl-year">2025</span><span class="tl-desc-s">에이전트<br>수십분~수시간</span></div>
+        <div class="tl-arrow">→</div>
+        <div class="tl-step current"><span class="tl-year">2026 ◀ 현재</span><span class="tl-desc-s">멀티에이전트<br>협업·IDE 통합</span></div>
+        <div class="tl-arrow">→</div>
+        <div class="tl-step future"><span class="tl-year">2027~28</span><span class="tl-desc-s">모듈 단위<br>자율 개발</span></div>
+    </div>
+    <div class="tip" style="margin-top:2.5vh;"><p>단독 작업 → 팀 단위 병렬 작업으로 진화하는 변곡점</p></div>
+</div>
+
+<!-- ========== SLIDE 16: 붉은 여왕 효과 ========== -->
+<div class="slide s04" style="background:#0D0D22;">
+    <div class="bigquote">
+        "이곳에서는 같은 자리에 머물기 위해서라도<br>있는 힘껏 달려야 한단다"
+        <cite>Red Queen Effect · 『거울 나라의 앨리스』<br>멈춰 있는 것이 곧 뒤처지는 것</cite>
+    </div>
+</div>
+
+<!-- ========== SLIDE 17: 컴파일러·임베디드 ========== -->
+<div class="slide dark">
+    <div class="eyebrow">확산 범위</div>
+    <h3>웹 → 컴파일러 → 임베디드</h3>
+    <ul class="klist" style="margin-top:1.5vh;">
+        <li><strong>LLVM · GCC</strong> — AI 도구 기여 정책 공식 수립 단계. 컴파일러 기반에서도 AI 역할 확대</li>
+        <li><strong>Embedder</strong> — C/C++·Rust 대상 AI 펌웨어 플랫폼 등장. MCU 드라이버 자동 생성, 실시간 컴파일 진단</li>
+        <li><strong>AI가 AI를 만든다</strong> — GPT-5.3-Codex는 자기 자신의 개발에 사용된 최초 모델</li>
+    </ul>
+    <div class="tip" style="margin-top:1.5vh;"><p>적용 속도는 분야별로 다르지만, 도달 범위는 계속 넓어지고 있습니다</p></div>
+</div>
+
+<!-- ========== SLIDE 18: SECTION 04 HEADER ========== -->
+<div class="slide s04">
+    <div class="section-num">Section 04</div>
+    <h1>Model ≠ Agent</h1>
+    <div class="sub">두 개의 독립 변수</div>
+</div>
+
+<!-- ========== SLIDE 19: SSD 비유 ========== -->
+<div class="slide dark">
+    <div class="eyebrow">SSD 비유로 이해하기</div>
+    <div class="cards" style="margin-top:2.5vh;">
+        <div class="card">
+            <div class="card-label">NAND = Model</div>
+            <div class="card-value">Opus 4.6<br>GPT-5.3-Codex<br>Gemini 3 Pro</div>
+        </div>
+        <div class="card fill-blue">
+            <div class="card-label">Firmware = Agent</div>
+            <div class="card-value">Claude Code<br>Codex<br>Antigravity</div>
+        </div>
+    </div>
+    <div class="sub" style="margin-top:2vh;font-size:clamp(0.9rem,1.15vw,1.05rem);">NAND가 아무리 좋아도 Firmware가 부족하면 성능이 안 나온다<br>역으로, Firmware가 좋아도 NAND가 받쳐주지 않으면 한계가 있다</div>
+</div>
+
+<!-- ========== SLIDE 20: 회사별 조합 ========== -->
+<div class="slide dark">
+    <div class="eyebrow">회사별 Model × Agent 조합</div>
+    <table class="tbl" style="margin-top:2vh;">
+        <thead>
+            <tr><th>회사</th><th>모델</th><th>에이전트</th><th>가격</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Anthropic</td><td>Opus 4.6 · Sonnet 4.5 · Haiku 4.5</td><td>Claude Code · Cowork</td><td class="num">$100~200/월</td></tr>
+            <tr><td>OpenAI</td><td>GPT-5.3-Codex</td><td>Codex</td><td class="num">구독제</td></tr>
+            <tr><td>Google</td><td>Gemini 3 Pro · Flash</td><td>Antigravity · Workspace</td><td class="num">무료 Preview</td></tr>
+            <tr><td>IDE 도구</td><td>모델 교체 가능</td><td>Cursor · Windsurf · Kimi Code</td><td class="num">$0~200/월</td></tr>
+        </tbody>
+    </table>
+    <div class="tip" style="margin-top:1.5vh;"><p>같은 에이전트도 모델에 따라, 같은 모델도 에이전트에 따라 성능이 크게 달라집니다</p></div>
+</div>
+
+<!-- ========== SLIDE 21: 성능 공식 ========== -->
+<div class="slide s04">
+    <div class="eyebrow">성능 공식</div>
+    <div class="formula-box" style="max-width:80vw;">
+        <div class="formula-main"><span class="blue">Model</span> × <span style="opacity:0.6">Agent (Harness)</span> × <span class="blue">Pilot</span></div>
+        <div class="formula-note" style="margin-top:12px;">세 변수 중 하나라도 0이면 전체가 0</div>
+        <div class="formula-note" style="margin-top:8px;font-size:0.75em;opacity:0.6;">* Agent Harness: 도구·메모리·상태를 관리하며 자율 실행을 가능하게 하는 운영 계층</div>
+    </div>
+</div>
+
+<!-- ========== SLIDE 22: OpenClaw 사례 ========== -->
+<div class="slide dark">
+    <div class="eyebrow">독립 변수의 증거</div>
+    <h3>OpenClaw</h3>
+    <div class="sub" style="font-size:clamp(0.9rem,1.1vw,1rem);margin-bottom:2vh;">1인 개발자가 만든 오픈소스 에이전트 프레임워크</div>
+    <div class="qbox">
+        <p>OpenAI와 Meta가 개발자 영입을 두고 경쟁 → OpenAI 합류 (2026.2.15)<br>모델 자체가 아닌 <strong>모델을 오케스트레이션하는 레이어</strong>의 역량을 별도로 확보하려 한 것</p>
+    </div>
+    <div class="tip" style="margin-top:1.5vh;"><p>두 변수가 서로 대체 불가능한 독립적 가치를 갖고 있음을 시사</p></div>
+</div>
+
+<!-- ========== SLIDE 23: SECTION 05 HEADER ========== -->
+<div class="slide s05">
+    <div class="section-num">Section 05</div>
+    <h1>패러다임<br>전환</h1>
+    <div class="sub">챗봇에서 에이전트로</div>
+</div>
+
+<!-- ========== SLIDE 24: 챗봇 vs 에이전트 ========== -->
+<div class="slide dark">
+    <div class="eyebrow">무엇이 달라졌나</div>
+    <table class="tbl" style="margin-top:2vh;font-size:clamp(0.78rem,0.95vw,0.9rem);">
+        <thead>
+            <tr><th>항목</th><th>챗봇 (ChatGPT·Claude 웹)</th><th>에이전트 (Claude Code·Codex·Cowork)</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>환경 인식</td><td>사용자가 복사한 텍스트만 봄</td><td>프로젝트 전체 파일시스템·업무 도구 접근</td></tr>
+            <tr><td>실행 능력</td><td>텍스트 출력만</td><td>파일 생성·수정, 터미널 실행, 외부 도구 연동</td></tr>
+            <tr><td>작업 범위</td><td>1회 질의-응답</td><td>다단계 자율 실행 (수시간~수일)</td></tr>
+            <tr><td>오류 대응</td><td>사용자가 에러 복사 후 재질문</td><td>자체 에러 감지 → 수정 → 재시도</td></tr>
+            <tr><td>비유</td><td>전화 상담원</td><td>파견된 시니어 개발자</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- ========== SLIDE 25: 대답 → 일하는 도구 ========== -->
+<div class="slide s05">
+    <h2>대답하는 도구<br>→ 일하는 도구</h2>
+    <div class="sub" style="margin-top:2.5vh;">법률 리서치 · CRM 관리 · 데이터 분석<br>전문 업무를 자율 수행</div>
+    <div class="warn" style="margin-top:3vh;">
+        <p>챗봇을 써본 경험만으로 에이전트를 판단하면 <strong>본질적 오해</strong>가 발생합니다<br>이 차이는 말로 설명하는 것과 직접 사용하는 것의 간극이 가장 큰 영역입니다</p>
+    </div>
+</div>
+
+<!-- ========== SLIDE 26: SECTION 06 HEADER ========== -->
+<div class="slide s06">
+    <div class="section-num">Section 06</div>
+    <h1>역할의<br>변화</h1>
+    <div class="sub">"무엇을 만들 것인가"가 새로운 병목</div>
+</div>
+
+<!-- ========== SLIDE 27: Jensen Huang ========== -->
+<div class="slide dark">
+    <div class="eyebrow">Jensen Huang · NVIDIA CEO</div>
+    <h3>구현 비용의 붕괴</h3>
+    <div class="bigquote" style="font-size:clamp(1rem,1.8vw,1.5rem);margin-top:1.5vh;">
+        "코드를 작성하는 것은 본질적으로 타이핑이고,<br>타이핑은 점점 값싼 상품이 되고 있다.<br>정말로 중요한 것은 <span class="blue">어떤 질문을 할 수 있느냐</span>다."
+    </div>
+    <div class="sub" style="margin-top:2vh;font-size:clamp(0.85rem,1.1vw,1rem);">"소프트웨어 엔지니어의 목적은 코딩이 아니다.<br>알려진 문제를 풀고, 아직 발견되지 않은 문제를 찾는 것이다."</div>
+</div>
+
+<!-- ========== SLIDE 28: PM:Engineer 비율 ========== -->
+<div class="slide dark">
+    <div class="eyebrow">Andrew Ng · Google Brain 공동창립자</div>
+    <h3>PM:Engineer 비율의 역전</h3>
+    <div class="cards" style="margin-top:2vh;">
+        <div class="card">
+            <div class="card-label">전통적 비율</div>
+            <div class="card-value">1 PM : 6~7 Engineer</div>
+        </div>
+        <div class="card fill-blue">
+            <div class="card-label">변화 신호</div>
+            <div class="card-value">2 PM : 1 Engineer<br><span style="font-size:0.75em;opacity:0.7">첫 제안 등장</span></div>
+        </div>
+    </div>
+    <div class="qbox" style="margin-top:1.5vh;">
+        <p>엔지니어링 시간이 <strong>3주 → 1일</strong>로 압축되자, 제품 기획·사용자 피드백 수집이 새로운 병목으로 부상<br>한 달에 코드베이스를 <strong>3번 완전 재작성</strong>하는 팀 사례</p>
+    </div>
+</div>
+
+<!-- ========== SLIDE 29: Karpathy - Agentic Engineering ========== -->
+<div class="slide dark">
+    <div class="eyebrow">Andrej Karpathy · OpenAI 공동창립자</div>
+    <h3>Agentic Engineering</h3>
+    <div class="cards" style="margin-top:2vh;">
+        <div class="card">
+            <div class="card-label">2025 초</div>
+            <div class="card-value">Vibe Coding<br><span style="opacity:0.6;font-size:0.8em;">수동 80%</span></div>
+        </div>
+        <div class="card fill-blue">
+            <div class="card-label">2026.1</div>
+            <div class="card-value">Agentic Engineering<br><span style="opacity:0.8;font-size:0.8em;">에이전트 80%</span></div>
+        </div>
+    </div>
+    <div class="qbox" style="margin-top:1.5vh;">
+        <p>"99%의 시간 동안 직접 코드를 작성하지 않고, 에이전트들을 <strong>오케스트레이션하며 감독</strong>하는 것"<br>"20년 프로그래밍 커리어에서 가장 큰 변화" — LLM이 "일관성 임계점"을 넘었다</p>
+    </div>
+</div>
+
+<!-- ========== SLIDE 30: 모델의 약점 ========== -->
+<div class="slide dark">
+    <div class="eyebrow">Karpathy가 직접 지적한 모델의 약점</div>
+    <h3>Pilot의 검증 역량이 핵심</h3>
+    <ul class="klist" style="margin-top:2vh;max-width:65vw;">
+        <li>잘못된 가정 위에 <strong>계속 구축</strong></li>
+        <li>명확화 질문 <strong>없음</strong></li>
+        <li>과도한 <strong>추상화</strong></li>
+        <li><strong>아첨적 경향</strong> (hallucination 포함)</li>
+    </ul>
+    <div class="warn" style="margin-top:2vh;"><p>Agentic 시대일수록 Pilot의 <strong>검증 역량</strong>이 더 중요해진다</p></div>
+</div>
+
+<!-- ========== SLIDE 31: HBR 인지 노동 ========== -->
+<div class="slide dark">
+    <div class="eyebrow">Harvard Business Review · 2026.2</div>
+    <h3>"AI Doesn't Reduce Work<br>— It Intensifies It"</h3>
+    <div class="qbox" style="margin-top:1.5vh;">
+        <p>테크 기업 40명 · 8개월 추적 결과<br>절약된 시간이 휴식이나 깊은 사고로 돌아가지 않고 <strong>즉시 다른 업무로 채워졌다</strong></p>
+    </div>
+    <div class="warn" style="margin-top:1.5vh;">
+        <p><strong>업무량 잠행 증가 (Workload Creep)</strong><br>단기 생산성 향상이 인지 피로와 의사결정 품질 저하로 이어질 수 있다</p>
+    </div>
+</div>
+
+<!-- ========== SLIDE 32: METR RCT ========== -->
+<div class="slide dark">
+    <div class="eyebrow">METR 무작위 대조 시험 (RCT) · 숙련 오픈소스 개발자 16명</div>
+    <h3>인지적 착각 vs 실제 성과</h3>
+    <div class="cards" style="margin-top:2.5vh;">
+        <div class="card fill-red">
+            <div class="card-label">실제 결과</div>
+            <div class="card-value">작업 완료 시간<br><span class="red">19% 더 길었음</span></div>
+        </div>
+        <div class="card fill-green">
+            <div class="card-label">개발자 체감</div>
+            <div class="card-value">자신이<br><span class="green">20% 빠르다</span>고 느낌</div>
+        </div>
+    </div>
+    <div class="tip" style="margin-top:2vh;"><p>AI 생성물의 검토·수정·통합에 소요되는 <strong>비가시적 인지 노동</strong>이 과소평가되고 있다</p></div>
+</div>
+
+<!-- ========== SLIDE 33: DORA 증폭기 ========== -->
+<div class="slide dark">
+    <div class="eyebrow">DORA 2025 — Google DevOps Research</div>
+    <h3>AI는 증폭기 (Amplifier)</h3>
+    <div class="cards" style="margin-top:2.5vh;">
+        <div class="card fill-green">
+            <div class="card-label">성숙한 엔지니어링 조직</div>
+            <div class="card-value">효과 <span class="green">가속 ↑</span></div>
+        </div>
+        <div class="card fill-red">
+            <div class="card-label">기술 부채 · 프로세스 병목</div>
+            <div class="card-value">문제 <span class="red">악화 ↓</span></div>
+        </div>
+    </div>
+    <div class="warn" style="margin-top:1.5vh;"><p>개인 단위 PR 증가 ↑ — 그러나 조직 수준의 소프트웨어 딜리버리 지표는 <strong>정체</strong><br>개인 성과와 조직 성과는 다르다</p></div>
+</div>
+
+<!-- ========== SLIDE 34: 인재 파이프라인 ========== -->
+<div class="slide dark">
+    <div class="eyebrow">LeadDev 2025 · 엔지니어링 리더 조사</div>
+    <h3>인재 파이프라인의 위기</h3>
+    <div class="cards" style="margin-top:2vh;">
+        <div class="card fill-blue">
+            <div class="card-label">시니어 엔지니어</div>
+            <div class="card-value">AI = 거대한 힘의 배율기<br>설계·보안·성능 역량 <span class="blue">프리미엄 ↑</span></div>
+        </div>
+        <div class="card fill-red">
+            <div class="card-label">주니어 엔지니어</div>
+            <div class="card-value">채용 <span class="red">54%</span> 감소 계획<br>성장 사다리 붕괴</div>
+        </div>
+    </div>
+    <div class="warn" style="margin-top:1.5vh;"><p>시니어+AI로만 구성된 팀은 미래의 중급 인재 공급을 차단한다</p></div>
+</div>
+
+<!-- ========== SLIDE 35: SECTION 07 HEADER ========== -->
+<div class="slide s07">
+    <div class="section-num">Section 07</div>
+    <h1>코딩을<br>넘어</h1>
+    <div class="sub">동시다발적 확산</div>
+</div>
+
+<!-- ========== SLIDE 36: 영상 AI 임계점 ========== -->
+<div class="slide dark">
+    <div class="eyebrow">ByteDance Seedance 2.0 · 2026.2.12</div>
+    <h3>영상·콘텐츠 제작 — 임계점 돌파</h3>
+    <ul class="klist" style="margin-top:1.5vh;">
+        <li>텍스트 입력 → <strong>대사·효과음·립싱크 완비 영상</strong> 출력</li>
+        <li>MPA · 디즈니 · 파라마운트 · SAG-AFTRA <strong>즉각 법적 대응</strong></li>
+        <li>상업 콘텐츠에 즉시 적용 가능한 수준의 퀄리티</li>
+    </ul>
+    <div class="tip" style="margin-top:1.5vh;"><p>AI 영상 생성이 이론적 가능성에서 <strong>산업적 현실</strong>로 넘어왔음을 보여주는 사건</p></div>
+</div>
+
+<!-- ========== SLIDE 37: Science AI ========== -->
+<div class="slide dark">
+    <div class="eyebrow">Science AI</div>
+    <h3>AI가 새로운 지식을 창출한다</h3>
+    <ul class="klist" style="margin-top:1.5vh;">
+        <li><strong>2024 노벨 화학상</strong> — AI 단백질 구조 예측 (AlphaFold · Google DeepMind)</li>
+        <li><strong>GPT-5.2</strong> — 이론 물리 새로운 공식 도출 → <span class="blue">12시간</span> 만에 자체 증명 완성</li>
+        <li><strong>Gemini 3 Deep Think</strong> — 코딩 경진대회(Codeforces) 전 세계 상위 <span class="blue">8등</span> 수준</li>
+    </ul>
+    <div class="qbox" style="margin-top:1.5vh;"><p>기존 지식의 정리를 넘어 <strong>새로운 지식을 창출</strong>하기 시작</p></div>
+</div>
+
+<!-- ========== SLIDE 38: 텍스트 vs 영상 리소스 ========== -->
+<div class="slide dark">
+    <div class="eyebrow">리소스 비교</div>
+    <h3>텍스트 LLM vs 영상 AI</h3>
+    <table class="tbl" style="margin-top:2vh;">
+        <thead>
+            <tr><th>단계</th><th>텍스트 LLM</th><th>영상 · 멀티모달 AI</th><th>배율</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>훈련 데이터</td><td>수십~수백 PB</td><td>수백~수천 PB</td><td class="num">10배+</td></tr>
+            <tr><td>추론 시 리소스</td><td>기준 1x</td><td>~10x</td><td class="num">10배</td></tr>
+            <tr><td>생성물 크기</td><td>수 KB</td><td>수백 MB~수 GB</td><td class="num">수만 배</td></tr>
+            <tr><td>KV 캐시</td><td>수 GB</td><td>수백 GB~TB급</td><td class="num">수십~수백 배</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- ========== SLIDE 39: 스토리지 수요 ========== -->
+<div class="slide s07">
+    <h2>AI 발전 = 스토리지 수요<br>지수 증가</h2>
+    <div class="cards" style="margin-top:2.5vh;">
+        <div class="card">
+            <div class="card-label">텍스트 LLM</div>
+            <div class="card-value">선형 증가</div>
+        </div>
+        <div class="card fill-blue">
+            <div class="card-label">영상 AI · 월드 모델</div>
+            <div class="card-value">지수적 증가</div>
+        </div>
+    </div>
+    <div class="tip" style="margin-top:2vh;"><p>NVIDIA가 KV 캐시를 HBM이 아닌 <strong>SSD 기반 플래시</strong>로 오프로드하는 구조를 채택<br>AI가 발전할수록 메모리 수요 함께 증가하는 경향은 당분간 지속</p></div>
+</div>
+
+<!-- ========== SLIDE 40: SECTION 08 HEADER ========== -->
+<div class="slide s08">
+    <div class="section-num">Section 08</div>
+    <h1>기술적 가능성<br>vs<br>현실 제약</h1>
+    <div class="sub">두 질문을 분리하기</div>
+</div>
+
+<!-- ========== SLIDE 41: 두 질문 분리 ========== -->
+<div class="slide dark">
+    <div class="eyebrow">핵심 프레임</div>
+    <div class="cards" style="margin-top:3vh;gap:24px;">
+        <div class="card" style="text-align:center;min-width:260px;">
+            <div class="card-label">질문 1</div>
+            <div class="card-value" style="font-size:clamp(1.2rem,2vw,1.6rem);">기술적으로<br>가능한가?</div>
+        </div>
+        <div style="display:flex;align-items:center;font-size:1.5rem;color:#3A3A4A;">≠</div>
+        <div class="card" style="text-align:center;min-width:260px;">
+            <div class="card-label">질문 2</div>
+            <div class="card-value" style="font-size:clamp(1.2rem,2vw,1.6rem);">우리 환경에서<br>적용 가능한가?</div>
+        </div>
+    </div>
+    <div class="tip" style="margin-top:2.5vh;"><p>이 두 가지를 분리하면 보다 정확한 판단이 가능해집니다</p></div>
+</div>
+
+<!-- ========== SLIDE 42: 세 가지 영역 ========== -->
+<div class="slide dark">
+    <div class="eyebrow">세 가지 영역</div>
+    <div class="zones" style="margin-top:2vh;">
+        <div class="zone-item a">
+            <div class="zone-lbl">A</div>
+            <div>
+                <div class="zone-title">기술적으로 가능 + 지금 적용 가능</div>
+                <div class="zone-ex">예: 사외망 PoC 환경에서의 AI 코드 분석·리팩토링·테스트 생성</div>
+            </div>
+        </div>
+        <div class="zone-item b">
+            <div class="zone-lbl">B</div>
+            <div>
+                <div class="zone-title">기술적으로 가능 + 환경 제약으로 적용 불가</div>
+                <div class="zone-ex">예: Agent의 JIRA/Confluence 연동, 사내망 프론티어 모델 직접 사용</div>
+            </div>
+        </div>
+        <div class="zone-item c">
+            <div class="zone-lbl">C</div>
+            <div>
+                <div class="zone-title">기술적으로 아직 불가능</div>
+                <div class="zone-ex">예: 100% 신뢰할 수 있는 자율 아키텍처 설계</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========== SLIDE 43: 영역 B가 핵심 ========== -->
+<div class="slide s08">
+    <div class="eyebrow">실무에서 관심이 집중되는 영역</div>
+    <h2 style="font-size:clamp(5rem,12vw,10rem);opacity:0.9;margin:1vh 0;">B</h2>
+    <div class="sub">"안 된다"고 판단된 항목 중 상당수가<br><strong>기술적 한계(C)가 아니라 환경적 제약(B)</strong>에 해당</div>
+    <div class="tip" style="margin-top:2vh;"><p>제약이라면 논의의 여지가 있다 / 한계라면 기술 성숙도를 지켜보는 영역이 된다</p></div>
+</div>
+
+<!-- ========== SLIDE 44: 우리 환경 적용 ========== -->
+<div class="slide dark">
+    <div class="eyebrow">우리 환경에의 적용</div>
+    <table class="tbl" style="margin-top:2vh;">
+        <thead>
+            <tr><th>제약 유형</th><th>현재 상태</th><th>해결 경로</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>사내망 보안</td><td>프론티어 AI 직접 사용 불가</td><td>사외망 별도망 구축 (진행 중)</td></tr>
+            <tr><td>코드 보안 레벨</td><td>외부 서비스 코드 노출 우려</td><td>코드 분류 재점검 (진행 중)</td></tr>
+            <tr><td>인프라·형상관리</td><td>기존 프로세스와 미연동</td><td>CI/CD 통합 파일럿 (계획)</td></tr>
+            <tr><td>SOP·프로세스</td><td>AI 산출물 직접 확인 구조</td><td>품질 게이트·리뷰 기준 재설계 (필요)</td></tr>
+            <tr><td>조직 인식</td><td>체감 부재로 관망</td><td>← 이 리포트와 Hands-on의 목적</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- ========== SLIDE 45: Hands-on 이유 ========== -->
+<div class="slide s07" style="background:#071810;">
+    <h2>사외 Hands-on의 이유</h2>
+    <div class="sub" style="margin-top:2.5vh;">영역 B의 제약을 <span class="green">일시적으로 제거</span>한 환경에서<br>영역 A의 가능성을 <span class="green">직접 확인</span>하기 위함</div>
+    <div class="tip" style="margin-top:3vh;"><p>기술적으로 무엇이 되는지 먼저 확인하면,<br>우리 환경에서 어떤 제약을 어떤 순서로 풀어갈지에 대한 논의로 자연스럽게 이어진다</p></div>
+</div>
+
+<!-- ========== SLIDE 46: SECTION 09 HEADER ========== -->
+<div class="slide s09">
+    <div class="section-num">Section 09</div>
+    <h1>과제</h1>
+    <div class="sub">조직 차원에서 풀어야 할 것들</div>
+</div>
+
+<!-- ========== SLIDE 47: 4가지 과제 ========== -->
+<div class="slide dark">
+    <div class="eyebrow">조직 차원 과제</div>
+    <ul class="klist" style="margin-top:2vh;max-width:78vw;">
+        <li><strong>내부 시스템 통합</strong> — JIRA · Confluence · Bitbucket 연동. 기술적으론 가능(영역 B), 보안 정책 검토 필요</li>
+        <li><strong>일하는 방법의 변화</strong> — 코드 리뷰 기준, 품질 게이트, 일정 산정, SOP 전반 재검토</li>
+        <li><strong>CI/CD 파이프라인 통합</strong> — AI 생성 코드의 빌드·테스트·배포 통합. 파일럿 → 단계적 확대</li>
+        <li><strong>리소스와 비용</strong> — 라이선스 · 인프라 · 보안 검토 인력 · 교육 리소스. 조직 차원 투자 판단</li>
+    </ul>
+    <div class="tip" style="margin-top:1.5vh;"><p>가능한 것의 범위를 먼저 확인하면, 제약의 무게도 가늠할 수 있습니다</p></div>
+</div>
+
+<!-- ========== SLIDE 48: SECTION 10 HEADER ========== -->
+<div class="slide s10">
+    <div class="section-num">Section 10</div>
+    <h1>향후 논의가<br>필요한<br>질문들</h1>
+</div>
+
+<!-- ========== SLIDE 49: 5가지 질문 ========== -->
+<div class="slide dark">
+    <div class="eyebrow">Hands-on 체험 후 도메인 단위로 논의하기 위한 질문들</div>
+    <table class="tbl" style="margin-top:2vh;">
+        <thead>
+            <tr><th style="width:22%">영역</th><th>질문</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>준비</td><td>AI 시대에 우리 조직은 무엇을 준비해야 하는가? 어떤 SOP를 새롭게 구축해야 하는가?</td></tr>
+            <tr><td>자율화</td><td>현재 업무 중 AI Agent에게 위임할 수 있는 영역은 어디인가?</td></tr>
+            <tr><td>제약 하의 실행</td><td>사내망·보안·프로세스 제약 하에서 지금 당장 할 수 있는 것은 무엇인가?</td></tr>
+            <tr><td>가능성과 제약의 분리</td><td>"안 된다"고 판단한 것 중, 기술적 한계(C)인가 환경적 제약(B)인가?</td></tr>
+            <tr><td>역량 전환</td><td>구성원에게 요구되는 역량이 어떻게 달라지며, 어떤 순서로 전환할 것인가?</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- ========== SLIDE 50: Hands-on 개요 ========== -->
+<div class="slide dark">
+    <div class="eyebrow">Hands-on 개요</div>
+    <table class="tbl" style="margin-top:2vh;">
+        <thead>
+            <tr><th style="width:20%">구분</th><th>사내 교육</th><th>사외 Hands-on</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>목적</td><td>업계 현황·핵심 개념 정리·시연·토론</td><td>AI Agent 직접 체험</td></tr>
+            <tr><td>시간</td><td>2시간</td><td>4시간 (반나절)</td></tr>
+            <tr><td>장소</td><td>SW개발팀 회의실</td><td>동탄에듀센터 (사외망)</td></tr>
+            <tr><td>체험 내용</td><td>Agent 동작 시연 · 기술 한계 vs 환경 제약 토론</td><td>Claude Cowork · Claude Code · 관심 업무 자유 체험</td></tr>
+        </tbody>
+    </table>
+    <div class="sub" style="margin-top:1.5vh;font-size:clamp(0.78rem,0.95vw,0.88rem);">기대 산출물: 조직별 AI 적용 가능 영역 1~2개 식별 / 되는 것·막혀 있는 것·아직 안 되는 것 구분 기준 형성</div>
+</div>
+
+<!-- ========== SLIDE 51: 마치며 ========== -->
+<div class="slide s01">
+    <h2>들어서 아는 것이 아니라</h2>
+    <div class="sub" style="font-size:clamp(1.2rem,2vw,1.7rem);margin-top:2vh;">해봤으니 안다고 답할 수 있을 때</div>
+    <div class="qbox" style="margin-top:3vh;">
+        <p>조직 차원의 의사결정 논의가 실질적으로 이루어집니다</p>
+    </div>
+    <div class="meta" style="margin-top:3vh;">이 리포트는 그 논의를 시작하기 위한 보조 자료이며,<br>사외 AI Agent Hands-on에서 직접 체험한 뒤 이어집니다</div>
+</div>
+
+<!-- ========== SLIDE 52: 이 리포트는 AI로 작성 ========== -->
+<div class="slide dark">
+    <div class="eyebrow">작성 방식</div>
+    <h3>이 리포트는 AI Agent로 작성되었습니다</h3>
+    <div class="cards" style="margin-top:2.5vh;">
+        <div class="card">
+            <div class="card-label">자료 수집 & 인사이트</div>
+            <div class="card-value">NotebookLM</div>
+        </div>
+        <div class="card fill-blue">
+            <div class="card-label">리포트 조사</div>
+            <div class="card-value">Claude Cowork</div>
+        </div>
+        <div class="card fill-green">
+            <div class="card-label">HTML 문서 구성</div>
+            <div class="card-value">Claude Code</div>
+        </div>
+    </div>
+    <div class="sub" style="margin-top:2vh;font-size:clamp(0.85rem,1.05vw,0.95rem);">작성자 역할: 구조 설계 · 팩트체크 · 최종 검증<br>Agent가 초안을 만들수록 사람의 역할은 <span class="blue">작성에서 검증으로</span> 이동했다</div>
+</div>
+
+</div><!-- /deck -->
+
+<div class="nav">
+    <button onclick="prev()">←</button>
+    <button onclick="next()">→</button>
+</div>
+<div class="pnum" id="pnum">1 / 1</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+let cur = 0;
+const pnumEl = document.getElementById('pnum');
+
+function update() {
+    pnumEl.textContent = (cur + 1) + ' / ' + total;
+}
+
+function goTo(i) {
+    if (i < 0) i = 0;
+    if (i >= total) i = total - 1;
+    cur = i;
+    document.getElementById('deck').style.transform = 'translateX(-' + cur + '00vw)';
+    update();
+}
+
+function next() { goTo(cur + 1); }
+function prev() { goTo(cur - 1); }
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); next(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prev(); }
+});
+
+let tx = 0;
+document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; });
+document.addEventListener('touchend', e => {
+    const d = tx - e.changedTouches[0].clientX;
+    if (Math.abs(d) > 50) { d > 0 ? next() : prev(); }
+});
+
+update();
+</script>
+</body>
+</html>
