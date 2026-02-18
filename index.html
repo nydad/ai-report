@@ -889,25 +889,31 @@ button:focus-visible {
 
     <h3>4.1 구조</h3>
     <p>
-      모델과 에이전트는 독립 변수입니다. SSD에 비유하면 모델은 NAND이고, 에이전트는 Solution에 해당합니다.
+      AI 관련 대화에서 용어 혼동이 자주 일어납니다. 제품명인지, 레이어명인지, 모델명인지 구분이 불명확한 채로 쓰이는 경우가 많고, 같은 단어가 문맥에 따라 다른 의미로 사용되기도 합니다. 이 절은 그 혼동을 정리하기 위해 별도로 구성했습니다.
+    </p>
+    <p>
+      모델과 에이전트는 독립 변수입니다. Samsung에 비유하면 이해하기 쉽습니다. (완전히 1:1로 대응되는 비유는 아니지만, 구조를 이해하는 데 참고용으로 활용합니다.)
+    </p>
+    <p>
+      <strong>Galaxy</strong>, <strong>Galaxy S25</strong>, <strong>Exynos 2500</strong>은 모두 삼성에서 나왔지만 전혀 다른 것을 지칭합니다. Galaxy는 브랜드명이고, Galaxy S25는 그 브랜드 아래의 특정 제품이며, Exynos 2500은 그 안에 탑재된 칩(두뇌)입니다. <strong>Claude, Claude Code, Opus 4.6도 마찬가지입니다.</strong> 같은 Anthropic에서 나왔지만, Claude는 브랜드명이고, Claude Code는 그 브랜드를 쓰는 특정 에이전트 제품이며, Opus 4.6은 그 안에 탑재된 모델(두뇌)입니다.
     </p>
 
     <div class="table-wrapper">
       <table>
         <thead>
-          <tr><th>역할</th><th>SSD 비유</th><th>Anthropic</th><th>Google</th><th>OpenAI</th></tr>
+          <tr><th>역할</th><th>Samsung 비유</th><th>Anthropic</th><th>Google</th><th>OpenAI</th></tr>
         </thead>
         <tbody>
           <tr><td>회사</td><td>Samsung</td><td>Anthropic</td><td>Google</td><td>OpenAI</td></tr>
-          <tr><td>브랜드</td><td>Samsung SSD</td><td>Claude</td><td>Gemini</td><td>GPT</td></tr>
-          <tr><td>모델 (제품군)</td><td>990 PRO / 870 EVO / PM9A3</td><td>Opus / Sonnet / Haiku</td><td>Gemini 3 Pro / Flash</td><td>GPT-5.3-Codex</td></tr>
-          <tr><td>에이전트 (구동 시스템)</td><td>Firmware</td><td>Claude Code, Cowork</td><td>Antigravity, Gemini in Workspace</td><td>Codex (클라우드 + 데스크톱)</td></tr>
+          <tr><td>브랜드</td><td>Galaxy</td><td>Claude</td><td>Gemini</td><td>GPT</td></tr>
+          <tr><td>에이전트 (제품)</td><td>Galaxy S25 / Galaxy Z Fold</td><td>Claude Code / Cowork</td><td>Antigravity / Gemini in Workspace</td><td>Codex (클라우드 + 데스크톱)</td></tr>
+          <tr><td>모델 (탑재 두뇌)</td><td>Exynos 2500 / Exynos 2400</td><td>Opus 4.6 / Sonnet 4.5 / Haiku 4.5</td><td>Gemini 3.0 Pro / Flash</td><td>GPT-5.3-Codex</td></tr>
         </tbody>
       </table>
     </div>
 
     <p>
-      NAND가 아무리 좋아도 Solution이 못 살리면 성능이 안 나오고, Solution이 아무리 정교해도 NAND 성능이 받쳐주지 않으면 한계가 있습니다. 마찬가지로, "Claude Code가 Antigravity보다 낫다"는 실제로 Claude Code + Opus 4.6 조합과 Antigravity + Gemini 3 Pro 조합의 비교입니다.
+      이 구조를 이해하고 나면, 흔히 쓰는 표현들에 얼마나 많은 생략이 있는지 보이기 시작합니다. "Antigravity가 Cursor보다 낫다", "Claude Code가 제일 잘한다"는 말은 이 분야에 익숙한 사람들이 당연하게 여겨 생략한 표현들입니다. 엄밀히는 <em>비슷한 모델 조건에서 전반적으로 낫더라</em>, 또는 <em>특정 에이전트와 특정 모델의 조합이 다른 조합보다 낫다</em>는 의미를 담고 있습니다. 이 맥락에 익숙하지 않은 분들이 오해하는 경우가 많은 것도 이 때문입니다.
     </p>
 
     <div class="callout key">
@@ -915,7 +921,7 @@ button:focus-visible {
     </div>
 
     <p>
-      이 독립성을 보여주는 최근 사례가 있습니다. OpenClaw는 오스트리아 출신 개발자 Peter Steinberger가 만든 오픈소스 에이전트 프레임워크로, 모델 자체가 아니라 모델을 오케스트레이션하는 레이어에 해당합니다. OpenAI와 Meta가 Steinberger의 영입을 두고 경쟁했고, 결국 OpenAI에 합류한 것으로 보도되었습니다(2026.2.15). 모델을 만드는 기업들이 에이전트 레이어의 역량을 별도로 확보하려 한다는 점은, 두 변수가 서로 대체 불가능한 독립적 가치를 갖고 있음을 시사합니다.
+      모델이 성능의 핵심 변수인 것은 분명하지만, 에이전트 레이어 역시 독립적인 가치를 갖기 시작했습니다. OpenClaw 개발자 Peter Steinberger를 두고 OpenAI와 Meta가 영입 경쟁을 벌인 것(2026.2.15)은, 에이전트 구성 역량이 모델과는 별개로 평가받고 있다는 것을 단적으로 보여주는 사례입니다.
     </p>
 
     <h3>4.2 성능 공식</h3>
@@ -927,7 +933,7 @@ button:focus-visible {
     </div>
 
     <p>
-      최고의 NAND를 탑재해도 Firmware가 부족하면 SSD 성능이 안 나오듯, 최고의 모델을 써도 에이전트가 부족하면 성능이 안 나오고, 둘 다 갖춰도 Pilot이 무엇을 만들어야 하는지 정의하지 못하면 의미가 없습니다.
+      최고의 모델을 써도 에이전트가 부족하면 성능이 안 나오고, 둘 다 갖춰도 Pilot이 무엇을 만들어야 하는지 정의하지 못하면 의미가 없습니다.
     </p>
   </div>
 </section>
@@ -1046,7 +1052,7 @@ button:focus-visible {
 
     <h3>7.2 Science AI</h3>
     <p>
-      2024년 노벨 화학상이 AI 단백질 구조 예측 연구(Google DeepMind의 AlphaFold 등)에 돌아간 데 이어, 2025~2026년에는 AI가 기존 지식의 정리를 넘어 <strong>새로운 지식을 창출</strong>하기 시작했습니다. GPT-5.2는 이론 물리학에서 새로운 공식을 도출하고 <span class="big-num">12시간</span> 만에 자체 증명을 완성했으며, Gemini 3 Deep Think은 코딩 경진대회(Codeforces)에서 전 세계 상위 <span class="big-num">8등</span> 수준을 기록했습니다.
+      2024년 노벨 화학상이 AI 단백질 구조 예측 연구(Google DeepMind의 AlphaFold 등)에 돌아간 데 이어, 2025~2026년에는 AI가 기존 지식의 정리를 넘어 <strong>새로운 지식을 창출</strong>하기 시작했습니다. GPT-5.2는 이론 물리학에서 새로운 공식을 도출하고 <span class="big-num">12시간</span> 만에 자체 증명을 완성했으며, Gemini 3.0 Deep Think은 코딩 경진대회(Codeforces)에서 전 세계 상위 <span class="big-num">8등</span> 수준을 기록했습니다.
     </p>
 
     <h3>7.3 우리와의 접점 — 메모리 수요의 구조적 전환</h3>
