@@ -1,7 +1,7 @@
 h1. S/W개발팀 리더진 AI Hands-on 프로그램 추진안
 
-{panel:bgColor=#EEF2FF|borderColor=#1428A0|borderWidth=2}
-*작성자:* 김학민 (SE) &nbsp;&nbsp;&nbsp;&nbsp; *일자:* 2026.02.17 &nbsp;&nbsp;&nbsp;&nbsp; *대상:* PL · 임원
+{panel:bgColor=#F5F6F8|borderColor=#8A9BB5|borderWidth=1}
+*작성자:* 김학민 (SE)     *일자:* 2026.02.17     *대상:* PL · 임원
 {panel}
 
 ----
@@ -16,11 +16,11 @@ h2. 요약
 
 *대상 범위 · 일정 · 회차*: EA 협의
 
-{warning:title=팀장님 협조 요청}
+{panel:title=팀장님 협조 요청|titleBGColor=#B07A3E|titleColor=#ffffff|bgColor=#FBF6EF|borderColor=#C8955A|borderWidth=1}
 * 사내 교육 및 사외 Hands-on에 직접 지시, 가능하면 함께 참석
 * 사내 교육 오프닝에서 프로그램 취지를 리더진께 직접 설명
 * 현장 확산을 위한 동기부여 체계 방향 검토 (섹션 5 참조)
-{warning}
+{panel}
 
 ----
 
@@ -40,7 +40,7 @@ h2. 2. 프로그램 목적
 * 기술적으로 가능한 것 *(A)* / 환경 제약으로 막힌 것 *(B)* / 기술 한계 *(C)* 를 구분할 수 있는가
 * AI 확대 시 관리자에게 요구되는 역량은 어떻게 달라지는가
 
-{panel:title=프로그램 목표|titleBGColor=#1428A0|titleColor=#ffffff|bgColor=#EEF2FF|borderColor=#1428A0}
+{panel:title=프로그램 목표|titleBGColor=#4A6FA5|titleColor=#ffffff|bgColor=#F2F5FA|borderColor=#7A9BC5|borderWidth=1}
 직접 체험을 통해, *판단 기준이 자연스럽게 형성될 수 있도록* 설계했습니다.
 {panel}
 
@@ -67,9 +67,9 @@ h3. 3-2. 사외 Hands-on (4시간 · 동탄에듀센터, 사외망)
 | 4 | 체험 3 | 응용 체험 — 본인 업무를 직접 적용해 자유 시도 |
 | 5 | 마무리 | 체험 결과 공유 및 조직 적용 가능 영역 토론 |
 
-{note:title=사외망에서 진행하는 이유}
+{panel:title=사외망에서 진행하는 이유|titleBGColor=#6B8BAD|titleColor=#ffffff|bgColor=#F2F5FA|borderColor=#8AAAC8|borderWidth=1}
 환경 제약(B)을 일시적으로 제거한 상태에서 기술적 가능성(A)의 범위를 직접 확인하기 위함.
-{note}
+{panel}
 
 *대상 범위 · 일정 · 회차*: EA 협의
 
@@ -83,7 +83,7 @@ h2. 4. 기대 산출물
 
 || 산출물 || 내용 ||
 | *A / B / C 구분 기준* | 기술적으로 가능 / 환경 제약 / 기술 한계 분류 기준 형성 |
-| *AI 적용 영역 식별* | 자기 조직 업무 중 AI 적용 가능 영역 1\~2개 식별 |
+| *AI 적용 영역 식별* | 자기 조직 업무 중 AI 적용 가능 영역 1~2개 식별 |
 | *도구 선정 기준* | Model / Agent 구조 기반의 도구 선정 · 성능 평가 판단 기준 확보 |
 | *조직 논의 기반 마련* | AI 활용 확대를 위한 조직 차원 논의 기반 마련 |
 
@@ -91,9 +91,9 @@ h2. 4. 기대 산출물
 
 h2. 5. 확산 여건
 
-AI를 적극적으로 활용하는 구성원이 이미 있지만, 확산은 아직 개인의 선의에 기대는 수준입니다.
+AI를 적극적으로 활용하는 구성원이 이미 있지만, 확산은 아직 개인의 선의에 기대고 있습니다.
 역할과 기대치가 조직 차원에서 함께 논의될 때, 흐름이 달라질 수 있습니다.
 
-{panel:title=동기부여 체계 방향|titleBGColor=#1428A0|titleColor=#ffffff|bgColor=#EEF2FF|borderColor=#1428A0}
+{panel:title=동기부여 체계 방향|titleBGColor=#4A6FA5|titleColor=#ffffff|bgColor=#F2F5FA|borderColor=#7A9BC5|borderWidth=1}
 AI 활용이 *업무의 일부*로 자연스럽게 자리잡을 수 있는 환경과 동기부여 체계가 함께 갖춰진다면, 이 프로그램의 효과가 현장까지 이어질 수 있습니다.
 {panel}
