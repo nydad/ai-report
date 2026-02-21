@@ -1,1272 +1,2078 @@
 <!DOCTYPE html>
+
 <html lang="ko">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Phase Change — 들어서 아는 것과 경험하는 것의 차이</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Noto+Serif+KR:wght@400;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Phase Change — AI Agent Era Baseline Report</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-:root {
-  --bg: #f7f7f5;
-  --surface: #ffffff;
-  --surface2: #f0eeeb;
-  --border: #ddd9d3;
-  --border-light: #e8e5e0;
-  --text: #2c2c2c;
-  --text-dim: #555555;
-  --text-muted: #767676;
-  --primary: #3a5a8c;
-  --primary-light: #5a7ab0;
-  --primary-pale: rgba(58,90,140,0.05);
-  --primary-glow: rgba(58,90,140,0.10);
-  --accent2: #4a7a9e;
-  --warn: #b8863a;
-  --warn-bg: rgba(184,134,58,0.05);
-  --green: #4a7a5a;
-  --green-bg: rgba(74,122,90,0.05);
-  --red: #9a5a5a;
-  --red-bg: rgba(154,90,90,0.05);
-  --num-color: #3a5a8c;
-  --section-gap: 100px;
-}
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background:
+                radial-gradient(1200px 700px at 15% 10%, rgba(247, 231, 206, 0.06), rgba(0, 0, 0, 0) 55%),
+                radial-gradient(900px 600px at 85% 25%, rgba(167, 243, 208, 0.05), rgba(0, 0, 0, 0) 60%),
+                linear-gradient(160deg, #0C0F1E 0%, #0B1326 48%, #0A0D16 100%);
+            color: #EFF2FA;
+            overflow: hidden;
+            word-break: keep-all;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+        /* ── 슬라이드 컨테이너 — 전환 효과 없음 ── */
+        .slides {
+            display: flex;
+            transition: none;
+        }
 
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Noto Sans KR', -apple-system, sans-serif;
-  font-weight: 400;
-  line-height: 1.85;
-  font-size: 16px;
-  -webkit-font-smoothing: antialiased;
-}
+        .slide {
+            min-width: 100vw;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 3vh 5vw;
+            background: transparent;
+            box-sizing: border-box;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            position: relative;
+        }
 
-.hero {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  padding: 60px 24px;
-  background: linear-gradient(165deg, #2a3a54 0%, #3a5a8c 40%, #4a6a9c 70%, #5a7ab0 100%);
-  color: #fff;
-  position: relative;
-  overflow: hidden;
-}
-.hero::before {
-  content: '';
-  position: absolute;
-  top: -30%; right: -20%;
-  width: 600px; height: 600px;
-  background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%);
-  border-radius: 50%;
-}
-.hero-tag {
-  font-size: 11px;
-  letter-spacing: 6px;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.65);
-  margin-bottom: 48px;
-  font-weight: 500;
-}
-.hero h1 {
-  font-family: 'Noto Serif KR', serif;
-  font-size: clamp(36px, 6vw, 64px);
-  font-weight: 700;
-  line-height: 1.3;
-  margin-bottom: 32px;
-  color: #fff;
-}
-.hero-sub {
-  font-size: 18px;
-  color: rgba(255,255,255,0.7);
-  font-weight: 300;
-  line-height: 1.7;
-  max-width: 560px;
-}
-.hero-meta {
-  margin-top: 64px;
-  font-size: 13px;
-  color: rgba(255,255,255,0.55);
-  letter-spacing: 1px;
-}
+        .slide>* {
+            flex-shrink: 0;
+        }
 
-.container {
-  max-width: 780px;
-  margin: 0 auto;
-  padding: 0 32px;
-}
+        /* ── Base Themes ── */
+        .slide.surface {
+            background: #111422;
+        }
 
-.exec-summary {
-  padding: 80px 0;
-  background: #fff;
-  border-bottom: 1px solid var(--border-light);
-}
-.exec-summary .container {
-  background: var(--primary-pale);
-  border: 1px solid rgba(58,90,140,0.10);
-  border-radius: 0;
-  padding: 48px;
-}
-.exec-label {
-  font-size: 11px;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  color: var(--primary);
-  margin-bottom: 24px;
-  font-weight: 700;
-}
-.exec-summary p {
-  font-size: 17px;
-  line-height: 2;
-  color: var(--text);
-}
+        .slide.light {
+            background: #F0F4FF;
+            color: #0C0F1E;
+        }
 
-.toc {
-  padding: 64px 0;
-  background: #fff;
-  border-bottom: 1px solid var(--border-light);
-}
-.toc h2 {
-  font-size: 13px;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin-bottom: 40px;
-  font-weight: 500;
-}
-.toc-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0;
-}
-.toc-item {
-  display: flex;
-  align-items: baseline;
-  gap: 16px;
-  padding: 14px 8px;
-  border-bottom: 1px solid var(--border-light);
-  text-decoration: none;
-  transition: all 0.2s;
-}
-.toc-item:hover { background: var(--primary-pale); }
-.toc-num {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 13px;
-  color: var(--primary);
-  min-width: 28px;
-  font-weight: 700;
-}
-.toc-title { font-size: 14px; color: var(--text-dim); }
-.toc-item:hover .toc-title { color: var(--text); }
+        .slide.light .sub {
+            color: #3A4A6A;
+        }
 
-.section {
-  padding: var(--section-gap) 0;
-  background: #fff;
-  border-bottom: 8px solid var(--bg);
-}
-.section.alt-bg { background: var(--bg); }
-.section:last-child { border-bottom: none; }
-.section-num {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 56px;
-  font-weight: 900;
-  color: rgba(58,90,140,0.08);
-  line-height: 1;
-  margin-bottom: 8px;
-}
-.section h2 {
-  font-family: 'Noto Serif KR', serif;
-  font-size: clamp(26px, 3.5vw, 34px);
-  font-weight: 700;
-  line-height: 1.4;
-  margin-bottom: 12px;
-  color: var(--text);
-}
-.section h2 small {
-  display: block;
-  font-family: 'Noto Sans KR', sans-serif;
-  font-size: 15px;
-  font-weight: 400;
-  color: var(--text-dim);
-  margin-top: 8px;
-}
-.section h3 {
-  font-size: 20px;
-  font-weight: 700;
-  margin-top: 56px;
-  margin-bottom: 16px;
-  color: var(--primary);
-}
-.section p {
-  margin-bottom: 20px;
-  color: var(--text);
-  line-height: 1.9;
-}
-.section-intro {
-  font-size: 16px;
-  color: var(--text-dim);
-  margin-bottom: 48px;
-  padding-bottom: 32px;
-  border-bottom: 1px solid var(--border-light);
-  line-height: 1.9;
-}
+        .slide.light .em {
+            color: #1428A0;
+        }
 
-.big-num {
-  font-family: 'JetBrains Mono', monospace;
-  font-weight: 700;
-  color: var(--primary);
-  font-size: 1.1em;
-}
-table .num {
-  font-family: 'JetBrains Mono', monospace;
-  font-weight: 700;
-  color: var(--primary);
-  font-size: 15px;
-}
+        /* ── Section Themes — vivid, distinct ── */
+        .slide.blue {
+            background: #1428A0;
+        }
 
-.callout {
-  margin: 40px 0;
-  padding: 28px 32px;
-  border-left: 4px solid var(--primary);
-  background: var(--primary-pale);
-  border-radius: 0;
-  font-size: 15px;
-  line-height: 1.9;
-  color: var(--text);
-}
-.callout.warn {
-  border-left-color: var(--warn);
-  background: var(--warn-bg);
-}
-.callout.key {
-  border-left-color: var(--primary-light);
-  background: var(--primary-pale);
-}
-.callout strong { color: var(--primary); font-weight: 700; }
-.callout.warn strong { color: #8a6528; }
+        .slide.navy {
+            background: #0D1B5E;
+        }
 
-.quote-block {
-  margin: 48px 0;
-  padding: 32px 40px;
-  position: relative;
-  background: var(--surface2);
-  border-radius: 0;
-}
-.quote-block::before {
-  content: '"';
-  font-family: 'Noto Serif KR', serif;
-  font-size: 72px;
-  color: rgba(58,90,140,0.10);
-  position: absolute;
-  top: 4px; left: 16px;
-  line-height: 1;
-}
-.quote-block p {
-  font-family: 'Noto Serif KR', serif;
-  font-size: 17px;
-  font-style: italic;
-  color: var(--text-dim);
-  line-height: 1.9;
-  margin-bottom: 0;
-}
-.quote-block cite {
-  display: block;
-  margin-top: 16px;
-  font-size: 13px;
-  font-style: normal;
-  color: var(--text-muted);
-}
+        .slide.indigo {
+            background: #2D1FA8;
+        }
 
-.table-wrapper {
-  margin: 32px 0;
-  overflow-x: auto;
-  border-radius: 0;
-  border: 1px solid var(--border);
-  background: #fff;
-}
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-}
-thead {
-  background: var(--primary);
-  color: #fff;
-}
-th {
-  padding: 14px 20px;
-  text-align: left;
-  font-weight: 500;
-  font-size: 12px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-td {
-  padding: 14px 20px;
-  border-bottom: 1px solid var(--border-light);
-  color: var(--text);
-  vertical-align: top;
-}
-tr:last-child td { border-bottom: none; }
-tr:nth-child(even) td { background: rgba(58,90,140,0.02); }
-tr:hover td { background: rgba(58,90,140,0.03); }
-td:first-child { font-weight: 500; }
-.source-note {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-top: 8px;
-  text-align: right;
-}
+        .slide.violet {
+            background: #5B1FA8;
+        }
 
-.timeline {
-  margin: 40px 0;
-  position: relative;
-  padding-left: 32px;
-}
-.timeline::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 8px; bottom: 8px;
-  width: 3px;
-  background: linear-gradient(to bottom, var(--primary), var(--primary-light));
-  border-radius: 0;
-}
-.tl-item {
-  position: relative;
-  margin-bottom: 28px;
-  padding-left: 20px;
-}
-.tl-item::before {
-  content: '';
-  position: absolute;
-  left: -38px; top: 10px;
-  width: 12px; height: 12px;
-  border-radius: 50%;
-  background: #fff;
-  border: 3px solid var(--primary);
-}
-.tl-item.current::before {
-  background: var(--primary);
-  box-shadow: 0 0 0 4px rgba(58,90,140,0.15);
-}
-.tl-year {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 14px;
-  color: var(--primary);
-  font-weight: 700;
-}
-.tl-desc {
-  font-size: 15px;
-  color: var(--text-dim);
-}
+        .slide.rose {
+            background: #A8194A;
+        }
 
-.compare-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  margin: 32px 0;
-}
-.compare-card {
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 0;
-  padding: 28px;
-}
-.compare-card h4 {
-  font-size: 13px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  margin-bottom: 20px;
-  padding-bottom: 12px;
-  border-bottom: 2px solid var(--border-light);
-}
-.compare-card.before h4 { color: var(--text-muted); border-bottom-color: var(--border); }
-.compare-card.after h4 { color: var(--primary); border-bottom-color: var(--primary); }
-.compare-card ul { list-style: none; }
-.compare-card li {
-  padding: 10px 0;
-  font-size: 14px;
-  color: var(--text-dim);
-  line-height: 1.7;
-}
-.compare-card li + li { border-top: 1px solid var(--border-light); }
-.compare-card li strong { color: var(--text); font-weight: 600; font-size: 13px; }
+        .slide.mint {
+            background: #0A7A56;
+        }
 
-.zone-grid {
-  display: grid;
-  gap: 16px;
-  margin: 32px 0;
-}
-.zone {
-  display: grid;
-  grid-template-columns: 56px 1fr 1.2fr;
-  gap: 20px;
-  align-items: start;
-  padding: 24px;
-  border-radius: 0;
-  border: 1px solid var(--border);
-}
-.zone-a { background: var(--green-bg); border-color: rgba(74,122,90,0.15); }
-.zone-b { background: var(--warn-bg); border-color: rgba(184,134,58,0.15); }
-.zone-c { background: var(--red-bg); border-color: rgba(154,90,90,0.15); }
-.zone-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 24px;
-  font-weight: 900;
-  line-height: 1;
-  padding-top: 2px;
-}
-.zone-a .zone-label { color: var(--green); }
-.zone-b .zone-label { color: var(--warn); }
-.zone-c .zone-label { color: var(--red); }
-.zone-desc { font-size: 14px; color: var(--text); line-height: 1.7; }
-.zone-desc strong { font-weight: 700; }
-.zone-example { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
+        .slide.teal {
+            background: #0A6E62;
+        }
 
-.appendix { background: var(--bg) !important; }
+        .slide.cyan {
+            background: #0A5E82;
+        }
 
-.speaker {
-  margin: 28px 0;
-  padding: 28px 32px;
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 0;
-  border-top: 3px solid var(--primary);
-}
-.speaker-name {
-  font-weight: 700;
-  font-size: 17px;
-  color: var(--primary);
-  margin-bottom: 4px;
-}
-.speaker-title {
-  font-size: 13px;
-  color: var(--text-muted);
-  margin-bottom: 16px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--border-light);
-}
-.speaker-content {
-  font-size: 14px;
-  color: var(--text-dim);
-  line-height: 1.9;
-}
-.speaker-content em {
-  font-family: 'Noto Serif KR', serif;
-  color: var(--text);
-  font-style: italic;
-}
+        .slide.amber {
+            background: #A05C00;
+        }
 
-.formula {
-  text-align: center;
-  padding: 40px;
-  margin: 32px 0;
-  background: var(--primary);
-  border-radius: 0;
-  color: #fff;
-}
-.formula-main {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 22px;
-  font-weight: 700;
-  margin-bottom: 12px;
-}
-.formula-note {
-  font-size: 14px;
-  color: rgba(255,255,255,0.65);
-}
+        .slide.orange {
+            background: #C04800;
+        }
 
-.stat-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 16px;
-  margin: 32px 0;
-}
-.stat-card {
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 0;
-  padding: 24px;
-  text-align: center;
-  border-top: 3px solid var(--primary);
-}
-.stat-value {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 36px;
-  font-weight: 900;
-  color: var(--primary);
-  line-height: 1.2;
-  margin-bottom: 8px;
-}
-.stat-label {
-  font-size: 13px;
-  color: var(--text-dim);
-  line-height: 1.5;
-}
+        .slide.samsung {
+            background: linear-gradient(135deg, #0A1060 0%, #1428A0 55%, #1A7AFC 100%);
+        }
 
-.footer {
-  padding: 80px 0 48px;
-  text-align: center;
-  background: var(--primary);
-  color: #fff;
-}
-.footer-line {
-  width: 48px;
-  height: 3px;
-  background: rgba(255,255,255,0.3);
-  margin: 0 auto 32px;
-  border-radius: 0;
-}
-.footer p {
-  font-size: 13px;
-  color: rgba(255,255,255,0.5);
-  letter-spacing: 1px;
-}
+        /* ── Section .sub 밝기 ── */
+        .slide.blue .sub,
+        .slide.navy .sub,
+        .slide.indigo .sub,
+        .slide.violet .sub,
+        .slide.rose .sub,
+        .slide.mint .sub,
+        .slide.teal .sub,
+        .slide.cyan .sub,
+        .slide.amber .sub,
+        .slide.orange .sub,
+        .slide.samsung .sub {
+            color: rgba(255, 255, 255, 0.75);
+        }
 
-@media (max-width: 1024px) {
-  .container { max-width: 680px; }
-  .stat-row { grid-template-columns: repeat(2, 1fr); }
-}
+        /* ── Section .em 색상 ── */
+        .slide.blue .em {
+            color: #7AB8FF;
+        }
 
-@media (max-width: 768px) {
-  :root { --section-gap: 72px; }
-  .container { padding: 0 20px; }
-  .exec-summary .container { padding: 28px 20px; }
-  .toc-grid { grid-template-columns: 1fr; }
-  .compare-grid { grid-template-columns: 1fr; }
-  .zone { grid-template-columns: 40px 1fr; }
-  .zone-example { grid-column: 1 / -1; }
-  .section-num { font-size: 40px; }
-  .quote-block { padding: 24px 20px; }
-  table { font-size: 13px; }
-  th, td { padding: 10px 14px; }
-  .stat-row { grid-template-columns: 1fr 1fr; }
-  .stat-value { font-size: 28px; }
-  .hero { min-height: 80vh; }
-}
+        .slide.navy .em {
+            color: #7AB8FF;
+        }
 
-@page { size: A4; margin: 15mm 18mm; }
-@media print {
+        .slide.indigo .em {
+            color: #A5B4FC;
+        }
 
-  /* ── 배경색 전체 제거, 흰 배경 통일 ── */
-  *, *::before, *::after {
-    background: #fff !important;
-    background-image: none !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
-    animation: none !important;
-    transition: none !important;
-  }
+        .slide.violet .em {
+            color: #C4B5FD;
+        }
 
-  body { color: #2c2c2c; }
+        .slide.rose .em {
+            color: #FDA4AF;
+        }
 
-  /* ── 텍스트 색상 복원 ── */
-  .hero, .footer { color: #2c2c2c !important; }
-  thead th { color: #2c2c2c !important; border-bottom: 2px solid #3a5a8c !important; }
-  .formula, .formula * { color: #3a5a8c !important; border: 1px solid #3a5a8c !important; }
+        .slide.mint .em {
+            color: #4EEDB4;
+        }
 
-  /* ── 커버 페이지: hero 단독 1페이지 ── */
-  .hero {
-    min-height: 0;
-    height: 100vh;
-    max-height: 100vh;
-    overflow: hidden;
-    padding: 60px 40px;
-    page-break-after: always;
-  }
+        .slide.teal .em {
+            color: #4EEAB8;
+        }
 
-  /* ── Executive Summary: hero 이후 자연 흐름, 패딩 축소 ── */
-  .exec-summary {
-    padding: 32px 0;
-    page-break-before: auto;
-  }
-  .exec-summary .container { padding: 24px 32px; }
+        .slide.cyan .em {
+            color: #38E8F8;
+        }
 
-  /* ── TOC: exec-summary와 같은 페이지, 이후 강제 분리 ── */
-  .toc {
-    padding: 28px 0;
-    page-break-before: auto;
-    page-break-after: always;
-  }
+        .slide.amber .em {
+            color: #FBCF60;
+        }
 
-  /* ── 섹션 기본: 자연 흐름, 패딩 축소 ── */
-  .section {
-    border-bottom: none;
-    padding-top: 32px;
-    padding-bottom: 32px;
-    page-break-before: auto;
-  }
+        .slide.orange .em {
+            color: #FBCF80;
+        }
 
-  /* ── 주요 섹션: 새 페이지 강제 ── */
-  #s01 { page-break-before: always; } /* TOC 이후 본문 시작 */
-  #s03 { page-break-before: always; } /* 업계 기준선: 매우 큰 섹션 */
-  #s06 { page-break-before: always; } /* 역할의 변화: 5개 소섹션 */
-  #s10 { page-break-before: always; } /* 향후 논의 */
+        .slide.samsung .em {
+            color: #7AB8FF;
+        }
 
-  /* ── 부록 구분 헤더 (ID 없는 .section): 새 페이지, 패딩 최소 ── */
-  .section:not([id]) {
-    page-break-before: always;
-    padding-top: 20px !important;
-    padding-bottom: 12px !important;
-  }
+        /* ── 섹션 내 콘텐츠 슬라이드에 테마 연동 (in-* 클래스) ── */
+        .slide.in-blue {
+            background: #0E1228;
+        }
 
-  /* ── 부록/푸터: 자연 흐름 ── */
-  .appendix { page-break-before: auto; }
-  .footer { page-break-before: auto; min-height: auto; }
+        .slide.in-blue .em {
+            color: #7AB8FF;
+        }
 
-  /* ── 컴포넌트 분리 방지 ── */
-  .callout, .quote-block, .table-wrapper, .compare-card,
-  .zone, .formula, .stat-card, .exec-summary .container {
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-  .stat-row, .tl-item, .compare-grid, .zone-grid {
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
+        .slide.in-indigo {
+            background: #0F1030;
+        }
 
-  /* ── 제목: 항상 다음 내용과 함께 ── */
-  h2, h3 { page-break-after: avoid; break-after: avoid; }
-  tr { page-break-inside: avoid; break-inside: avoid; }
+        .slide.in-indigo .em {
+            color: #A5B4FC;
+        }
 
-  /* ── 텍스트 고아/과부 방지 ── */
-  p, li { orphans: 3; widows: 3; }
+        .slide.in-violet {
+            background: #130D28;
+        }
 
-  /* ── Speaker: 길면 자연 분리 ── */
-  .speaker { break-inside: auto; page-break-inside: auto; }
-  .speaker-name, .speaker-title { page-break-after: avoid; }
+        .slide.in-violet .em {
+            color: #C4B5FD;
+        }
 
-  /* ── 기타 ── */
-  .toc-item { text-decoration: none; }
-  .section-num { opacity: 0.55; }
-}
+        .slide.in-rose {
+            background: #1A0A14;
+        }
 
-a:focus-visible,
-button:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 3px;
-  border-radius: 2px;
-}
-</style>
+        .slide.in-rose .em {
+            color: #FDA4AF;
+        }
+
+        .slide.in-mint {
+            background: #081A14;
+        }
+
+        .slide.in-mint .em {
+            color: #4EEDB4;
+        }
+
+        .slide.in-cyan {
+            background: #081420;
+        }
+
+        .slide.in-cyan .em {
+            color: #38E8F8;
+        }
+
+        .slide.in-amber {
+            background: #1A1000;
+        }
+
+        .slide.in-amber .em {
+            color: #FBCF60;
+        }
+
+        .slide.in-orange {
+            background: #1A0E00;
+        }
+
+        .slide.in-orange .em {
+            color: #FBCF80;
+        }
+
+        /* ── Typography ── */
+        h1 {
+            font-size: clamp(3rem, 6vw, 5.5rem);
+            font-weight: 900;
+            text-align: center;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+        }
+
+        h2 {
+            font-size: clamp(2.2rem, 4.5vw, 4rem);
+            font-weight: 700;
+            text-align: center;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+        }
+
+        h3 {
+            margin: 0;
+            font-size: 1.28rem;
+            font-weight: 800;
+            letter-spacing: -0.015em;
+            color: #E9EEF8;
+        }
+
+        .sub {
+            font-size: clamp(1.3rem, 2.2vw, 1.8rem);
+            color: #99ABCA;
+            margin-top: 1.5vh;
+            text-align: center;
+            line-height: 1.5;
+            font-weight: 400;
+        }
+
+        .em {
+            color: #5FB3FF;
+        }
+
+        .red {
+            color: #FCA5A5;
+        }
+
+        .green {
+            color: #10E890;
+        }
+
+        .yellow {
+            color: #F2D7A1;
+        }
+
+        .meta {
+            margin-top: 2vh;
+            font-size: 0.9rem;
+            color: #3A4560;
+            font-weight: 400;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        /* ── Comparison Cards — 1행, border-top 힌트 ── */
+        .comp {
+            display: flex;
+            gap: 8px;
+            margin: 2vh 0;
+            flex-wrap: nowrap;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .comp-item {
+            padding: 28px 24px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.045);
+            flex: 1;
+            min-height: 140px;
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-top: 2px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            box-shadow:
+                0 14px 34px rgba(0, 0, 0, 0.18),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .comp-item.on {
+            background: #151C38;
+            border-top-color: rgba(90, 160, 220, 0.35);
+        }
+
+        .comp-item.green-on {
+            background: rgba(167, 243, 208, 0.085);
+            border-top-color: rgba(167, 243, 208, 0.26);
+            border-color: rgba(167, 243, 208, 0.18);
+        }
+
+        .comp-item.yellow-on {
+            background: rgba(247, 231, 206, 0.115);
+            border-top-color: rgba(247, 231, 206, 0.32);
+            border-color: rgba(247, 231, 206, 0.22);
+        }
+
+        .comp-item.red-on {
+            background: rgba(252, 165, 165, 0.080);
+            border-top-color: rgba(252, 165, 165, 0.25);
+            border-color: rgba(252, 165, 165, 0.18);
+        }
+
+        .comp-item .tag {
+            font-size: 0.80rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: rgba(255, 255, 255, 0.36);
+            font-weight: 500;
+        }
+
+        .comp-item.on .tag {
+            color: #7CA8D0;
+        }
+
+        .comp-item.green-on .tag {
+            color: #68B8A0;
+        }
+
+        .comp-item.yellow-on .tag {
+            color: #D0B870;
+        }
+
+        .comp-item.red-on .tag {
+            color: #D8A0A0;
+        }
+
+        .comp-item p {
+            font-size: clamp(1rem, 1.3vw, 1.25rem);
+            font-weight: 600;
+            line-height: 1.4;
+            color: #D8E0F0;
+        }
+
+        /* ── List ── */
+        .list {
+            list-style: none;
+            max-width: 80vw;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .list li {
+            font-size: clamp(1.1rem, 1.8vw, 1.5rem);
+            padding: 1.4vh 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: #C8D4E8;
+            font-weight: 400;
+            line-height: 1.35;
+            text-align: center;
+        }
+
+        .list li:last-child {
+            border-bottom: none;
+        }
+
+        .list strong {
+            color: #FFFFFF;
+            font-weight: 700;
+        }
+
+        /* ── Grid Cards — 1행, border-top 힌트 ── */
+        .grid {
+            display: flex;
+            gap: 8px;
+            margin-top: 2vh;
+            flex-wrap: nowrap;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .grid-item {
+            padding: 24px 20px;
+            text-align: center;
+            background: #151A2E;
+            flex: 1;
+            min-height: 90px;
+            border-radius: 2px;
+            border-top: 2px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .grid-item .name {
+            font-size: clamp(1rem, 1.3vw, 1.2rem);
+            font-weight: 700;
+            margin-bottom: 6px;
+            letter-spacing: -0.01em;
+            color: #E0E6F0;
+        }
+
+        .grid-item .desc {
+            font-size: clamp(0.82rem, 1vw, 0.95rem);
+            color: rgba(255, 255, 255, 0.45);
+            font-weight: 400;
+            line-height: 1.4;
+        }
+
+        /* ── Code ── */
+        .code {
+            background: #0A0C18;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 1.5vh 2vw;
+            font-family: 'JetBrains Mono', 'Consolas', monospace;
+            font-size: clamp(0.82rem, 0.95vw, 0.92rem);
+            line-height: 1.6;
+            max-width: 720px;
+            width: 100%;
+            margin: 1.5vh auto;
+            white-space: pre;
+            color: #C8D4E8;
+            text-align: left;
+            border-radius: 2px;
+            max-height: 55vh;
+            overflow-x: auto;
+            overflow-y: auto;
+        }
+
+        .code .comment {
+            color: #3A5070;
+        }
+
+        .code .keyword {
+            color: #C4B5FD;
+        }
+
+        .code .string {
+            color: #4EEDB4;
+        }
+
+        /* ── Quote ── */
+        blockquote {
+            font-size: clamp(1.6rem, 3vw, 2.2rem);
+            font-weight: 300;
+            max-width: 780px;
+            text-align: center;
+            line-height: 1.6;
+            color: #EFF2FA;
+            letter-spacing: -0.01em;
+        }
+
+        cite {
+            display: block;
+            margin-top: 24px;
+            font-size: 0.82rem;
+            color: rgba(255, 255, 255, 0.25);
+            font-style: normal;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        /* ── Note Box ── */
+        .note {
+            padding: 1.4vh 2.5vw;
+            margin-top: 2vh;
+            max-width: 82vw;
+            border-radius: 2px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .note.warn {
+            background: rgba(255, 207, 47, 0.06);
+            border: 1px solid rgba(255, 207, 47, 0.2);
+        }
+
+        .note.warn p {
+            color: #FFCF2F;
+            font-size: clamp(0.95rem, 1.2vw, 1.1rem);
+            font-weight: 500;
+        }
+
+        .note.tip {
+            background: rgba(16, 232, 144, 0.05);
+            border: 1px solid rgba(16, 232, 144, 0.18);
+        }
+
+        .note.tip p {
+            color: #10E890;
+            font-size: clamp(0.95rem, 1.2vw, 1.1rem);
+            font-weight: 500;
+        }
+
+        /* ── Pipeline ── */
+        .pipeline {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin: 2vh 0;
+            flex-wrap: nowrap;
+        }
+
+        .pipeline-step {
+            background: #151A2E;
+            padding: 1.4vh 2.4vw;
+            font-size: clamp(0.9rem, 1.15vw, 1.05rem);
+            font-weight: 600;
+            text-align: center;
+            border-radius: 2px;
+            border-top: 2px solid rgba(255, 255, 255, 0.06);
+            color: #D0D8E8;
+            white-space: nowrap;
+        }
+
+        .pipeline-step.on {
+            background: #151C38;
+            border-top-color: rgba(90, 160, 220, 0.35);
+            color: #90B8E0;
+        }
+
+        .pipeline-step.green {
+            background: #121E1C;
+            border-top-color: rgba(80, 190, 150, 0.30);
+            color: #68C8A8;
+        }
+
+        .pipeline-step.red {
+            background: #1C1418;
+            border-top-color: rgba(200, 120, 120, 0.30);
+            color: #D09090;
+        }
+
+        .pipeline-step.violet {
+            background: #18142A;
+            border-top-color: rgba(160, 140, 220, 0.30);
+            color: #B0A8D8;
+        }
+
+        .pipeline-arrow {
+            color: rgba(255, 255, 255, 0.12);
+            font-size: 1.2rem;
+            padding: 0 6px;
+        }
+
+        /* ── Table ── */
+        .tbl {
+            margin-top: 1.5vh;
+            border-collapse: collapse;
+            max-width: 82vw;
+        }
+
+        .tbl th,
+        .tbl td {
+            padding: 1vh 2vw;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .tbl th {
+            color: rgba(255, 255, 255, 0.3);
+            font-weight: 500;
+            font-size: 0.78rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .tbl td {
+            font-size: clamp(0.95rem, 1.15vw, 1.1rem);
+            color: #B8C8E0;
+        }
+
+        /* ── Tool Cards — 1행, border-top 힌트 ── */
+        .tool-cards {
+            display: flex;
+            gap: 8px;
+            flex-wrap: nowrap;
+            width: 100%;
+            max-width: 900px;
+            margin-top: 2vh;
+        }
+
+        .tool-card {
+            background: rgba(255, 255, 255, 0.045);
+            flex: 1;
+            padding: 22px 20px;
+            text-align: center;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-top: 2px solid rgba(255, 255, 255, 0.12);
+            box-shadow:
+                0 14px 34px rgba(0, 0, 0, 0.18),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tool-card.recommended {
+            background: rgba(167, 243, 208, 0.075);
+            border-top-color: rgba(167, 243, 208, 0.26);
+            border-color: rgba(167, 243, 208, 0.18);
+        }
+
+        .tool-card.hot {
+            background: rgba(247, 231, 206, 0.105);
+            border-top-color: rgba(247, 231, 206, 0.30);
+            border-color: rgba(247, 231, 206, 0.20);
+        }
+
+        .tool-card .name {
+            font-size: 1.02rem;
+            font-weight: 800;
+            color: #E9EEF8;
+            letter-spacing: -0.01em;
+        }
+
+        .tool-card .desc {
+            font-size: 0.82rem;
+            color: rgba(255, 255, 255, 0.45);
+            line-height: 1.35;
+        }
+
+        .tool-card .tag-item {
+            display: inline-block;
+            font-size: 0.78rem;
+            padding: 4px 12px;
+            background: rgba(247, 231, 206, 0.085);
+            color: rgba(255, 255, 255, 0.62);
+            border: 1px solid rgba(247, 231, 206, 0.18);
+            border-radius: 999px;
+            margin: 2px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .tool-card .tag-item.green {
+            background: rgba(80, 190, 150, 0.08);
+            color: #68B8A0;
+        }
+
+        .tool-card .tag-item.blue {
+            background: rgba(90, 160, 220, 0.08);
+            color: #7CA8D0;
+        }
+
+        .tool-card .tag-item.yellow {
+            background: rgba(200, 175, 90, 0.08);
+            color: #C0A860;
+        }
+
+        /* ── Stat Cards (2x2 Grid) ── */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 2vh;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.052);
+            padding: 32px 24px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.075);
+            border-top: 2px solid rgba(255, 255, 255, 0.14);
+            border-radius: 20px;
+            box-shadow:
+                0 18px 46px rgba(0, 0, 0, 0.22),
+                inset 0 1px 0 rgba(255, 255, 255, 0.06);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stat-card.on {
+            background: #151C38;
+            border-top-color: rgba(90, 160, 220, 0.35);
+        }
+
+        .stat-card.green-on {
+            background: rgba(167, 243, 208, 0.09);
+            border-top-color: rgba(167, 243, 208, 0.28);
+            border-color: rgba(167, 243, 208, 0.18);
+        }
+
+        .stat-card.red-on {
+            background: rgba(252, 165, 165, 0.085);
+            border-top-color: rgba(252, 165, 165, 0.26);
+            border-color: rgba(252, 165, 165, 0.18);
+        }
+
+        .stat-card .label {
+            font-size: 0.92rem;
+            color: rgba(255, 255, 255, 0.48);
+            text-transform: uppercase;
+            letter-spacing: 0.10em;
+            margin-bottom: 12px;
+        }
+
+        .stat-card .value {
+            font-size: clamp(2.5rem, 4vw, 3.5rem);
+            font-weight: 900;
+            line-height: 1;
+            color: #E0E6F0;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .source {
+            font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.30);
+        }
+
+        /* ── Layered Architecture ── */
+        .arch-layers {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            max-width: 700px;
+            margin-top: 3vh;
+        }
+
+        .arch-layer {
+            display: flex;
+            align-items: center;
+            background: #151A2E;
+            padding: 24px 32px;
+            border-left: 4px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .arch-layer.on {
+            background: #151C38;
+            border-left-color: #5FB3FF;
+        }
+
+        .arch-layer .role {
+            width: 120px;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            text-align: left;
+        }
+
+        .arch-layer .brand {
+            flex: 1;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #E0E6F0;
+            text-align: left;
+        }
+
+        .arch-layer .desc {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-align: right;
+        }
+
+        /* ── Image Placeholder ── */
+        .img {
+            background: #111422;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 4vh 3vw;
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .img .label {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .img .prompt {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.3);
+            line-height: 1.5;
+        }
+
+        /* ── Two Column Layout ── */
+        .two-col {
+            display: flex;
+            gap: 3vw;
+            width: 100%;
+            max-width: 900px;
+            margin-top: 2vh;
+        }
+
+        .two-col .col {
+            flex: 1;
+            text-align: left;
+        }
+
+        /* ── Typographic Impact ── */
+        .impact-text {
+            font-size: clamp(2.8rem, 5vw, 4.5rem);
+            font-weight: 900;
+            line-height: 1.2;
+            letter-spacing: -0.03em;
+            text-align: center;
+            color: #FFF;
+        }
+
+        .impact-sub {
+            font-size: clamp(1.4rem, 2vw, 1.8rem);
+            font-weight: 400;
+            color: #99ABCA;
+            margin-top: 2vh;
+            text-align: center;
+        }
+
+        /* ── Misc ── */
+        .big {
+            font-size: clamp(6rem, 18vw, 14rem);
+            font-weight: 900;
+            color: #1428A0;
+            line-height: 1;
+            opacity: 0.15;
+            position: absolute;
+            pointer-events: none;
+        }
+
+        .formula {
+            font-size: clamp(1.5rem, 3vw, 2.2rem);
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat .number {
+            font-size: clamp(4rem, 10vw, 8rem);
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            line-height: 1;
+            color: #5FB3FF;
+        }
+
+        .stat .label {
+            font-size: clamp(1rem, 1.5vw, 1.3rem);
+            color: #99ABCA;
+            margin-top: 1vh;
+            font-weight: 400;
+            letter-spacing: 0.05em;
+        }
+
+        /* ── Navigation ── */
+        .nav {
+            position: fixed;
+            bottom: 28px;
+            left: 40px;
+            display: flex;
+            gap: 4px;
+        }
+
+        .nav button {
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: 0;
+        }
+
+        .nav button:hover {
+            background: rgba(20, 40, 160, 0.25);
+            border-color: rgba(95, 179, 255, 0.4);
+            color: #fff;
+        }
+
+        .part-label {
+            position: fixed;
+            top: 28px;
+            left: 40px;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.18);
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .page-num {
+            position: fixed;
+            bottom: 28px;
+            right: 40px;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.15);
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.05em;
+        }
+
+        .progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #1428A0, #5FB3FF);
+            transition: none;
+            z-index: 100;
+        }
+
+        .slide::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        .slide::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        /* ── Responsive ── */
+        @media(max-width:768px) {
+            .slide {
+                padding: 28px 24px 72px 24px;
+            }
+
+            .comp,
+            .grid,
+            .tool-cards {
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .stat-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .arch-layers {
+                gap: 4px;
+            }
+
+            .arch-layer {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 16px 20px;
+                gap: 4px;
+            }
+
+            .arch-layer .role {
+                width: auto;
+                margin-bottom: 2px;
+            }
+
+            .arch-layer .desc {
+                text-align: left;
+            }
+
+            .two-col {
+                flex-direction: column;
+                gap: 2vh;
+            }
+
+            .tbl {
+                display: block;
+                overflow-x: auto;
+            }
+
+            .nav {
+                left: 20px;
+                bottom: 20px;
+            }
+
+            .pipeline {
+                flex-wrap: wrap;
+                gap: 1px;
+            }
+        }
+
+        /* ── Print ── */
+        @media print {
+            body {
+                background: #fff;
+                color: #000;
+                overflow: visible;
+            }
+
+            .nav,
+            .progress,
+            .part-label,
+            .page-num {
+                display: none;
+            }
+
+            .slides {
+                display: block;
+            }
+
+            .slide {
+                min-height: auto;
+                page-break-after: always;
+                background: #fff !important;
+                color: #000 !important;
+                padding: 2cm;
+            }
+
+            .slide.samsung,
+            .slide.blue,
+            .slide.navy,
+            .slide.indigo,
+            .slide.violet,
+            .slide.rose,
+            .slide.mint,
+            .slide.teal,
+            .slide.cyan,
+            .slide.amber,
+            .slide.orange {
+                color: #fff !important;
+            }
+        }
+
+        /* ── Accessibility ── */
+        @media(prefers-reduced-motion:reduce) {
+            .slides {
+                transition: none;
+            }
+
+            .nav button {
+                transition: none;
+            }
+        }
+
+        .nav button:focus-visible {
+            outline: 2px solid #5FB3FF;
+            outline-offset: 2px;
+        }
+
+        .slide:focus-visible {
+            outline: none;
+        }
+    </style>
 </head>
+
 <body>
+    <div class="part-label">AI Agent Era · Phase Change · 2026. 2</div>
+    <div class="progress" id="progress"></div>
+    <div class="slides" id="slides">
+        <div class="slide samsung">
+            <h1>Phase Change</h1>
+            <p class="sub">들어서 아는 것과 경험하는 것의 차이</p>
+            <p class="meta" style="margin-top:4vh; color:rgba(255,255,255,0.35);">AI Agent Era · Baseline Report
+                · 2026. 2 · 김학민 · SE P/J</p>
+        </div>
+        <div class="slide surface">
+            <h2>Executive Summary</h2>
+            <ul class="list" style="margin-top:2vh;">
+                <li><strong>AI 코딩 도구 채택률</strong> — <span class="em">90%+</span></li>
+                <li><strong>Vibe Coding</strong> — 신조어가 벌써 옛말, AI 코딩은 이제 <span class="em">기본값</span></li>
+                <li><strong>대답하는 도구 → 일하는 도구</strong> — 시장은 이미 반응 중</li>
+                <li><strong>에이전트 ≠ 모델</strong> — 독립 변수, 함께 봐야 정확한 판단</li>
+                <li><strong>오늘 발표의 목적</strong> — 기준선 형성 + 사외 Hands-on과 세트</li>
+            </ul>
+        </div>
+        <div class="slide surface">
+            <h3>오늘 발표의 구성</h3>
+            <ul class="list" style="margin-top:2vh;">
+                <li><strong>업계 최전선 인물들</strong>의 공개 발언 + 공식 보고서 기반 리서치</li>
+                <li>Jensen Huang, Karpathy, Amodei, Andrew Ng, Hassabis, Osmani</li>
+                <li><strong>조사시찰단의 교훈</strong> — 수용이든 거부든, <span class="em">직접 확인하는 과정</span>을 거쳤다는 점</li>
+                <li><strong>이 발표 + 사외 Hands-on</strong> = 세트 설계</li>
+            </ul>
+        </div>
+        <div class="slide rose">
+            <p class="meta" style="color:rgba(255,255,255,0.4);">SECTION 02</p>
+            <h1>시장 반응</h1>
+            <p class="sub"><span class="em">SaaSpocalypse</span> — SaaS + Apocalypse</p>
+        </div>
+        <div class="slide in-rose">
+            <h3>"Something Big is Happening"</h3>
+            <p class="sub" style="margin-bottom:2vh;">Matt Shumer · Fortune 기고 · 2026. 2. 11 · 수천만 회 조회
+            </p>
+            <div class="arch-layers">
+                <div class="arch-layer">
+                    <div class="role">SPEED</div>
+                    <div class="brand">4시간 후 수만 줄의 코드</div>
+                    <div class="desc">평문으로 설명하고 돌아오면 완성</div>
+                </div>
+                <div class="arch-layer on">
+                    <div class="role">AUTONOMY</div>
+                    <div class="brand">"준비되었습니다"</div>
+                    <div class="desc">스스로 앱을 열어 테스트하고 보고</div>
+                </div>
+                <div class="arch-layer">
+                    <div class="role">REALITY</div>
+                    <div class="brand">과장으로 보이는 단계</div>
+                    <div class="desc">지금이 바로 그 순간입니다</div>
+                </div>
+            </div>
+        </div>
+        <div class="slide">
+            <h3>SaaSpocalypse — 시장의 즉각적 반응</h3>
 
-<header class="hero">
-  <div class="hero-tag">AI Agent Era · Baseline Report</div>
-  <h1>Phase Change</h1>
-  <p class="hero-sub">들어서 아는 것과 경험하는 것의 차이</p>
-  <p class="hero-meta">2026. 2</p>
-  <p style="margin-top:56px; font-size:12px; color:rgba(255,255,255,0.28); letter-spacing:2px; font-weight:400;">
-    <kbd style="font-family:inherit; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:4px; padding:2px 7px; font-size:11px; letter-spacing:1px;">F11</kbd>
-    &nbsp;전체화면 후 스크롤 해주세요
-  </p>
-</header>
+            <div class="two-col" style="max-width: 1040px; align-items: center; margin-top: 4vh; gap: 4vw;">
+                <!-- Left: Chart -->
+                <div class="col" style="flex: 1.3; display: flex; flex-direction: column;">
+                    <div
+                        style="flex: 1; padding: 10px; background: rgba(196, 181, 253, 0.05); border-radius: 12px; border: 1px solid rgba(196, 181, 253, 0.2); box-shadow: inset 0 0 20px rgba(196, 181, 253, 0.02), 0 10px 30px rgba(0, 0, 0, 0.4); display: flex; justify-content: center; align-items: center;">
+                        <img src="assets/saaspocalypse_chart.png" alt="S&P 500 Software Industry Diagram"
+                            style="width: 100%; max-height: 44vh; object-fit: contain; mix-blend-mode: screen; opacity: 0.95; border-radius: 8px;" />
+                    </div>
+                    <p
+                        style="text-align: center; margin-top: 16px; font-size: 0.95rem; color: rgba(255,255,255,0.5); font-weight: 500; letter-spacing: 0.02em;">
+                        <span style="color:#FBCF80;">■ S&P 500</span> vs <span style="color:#C4B5FD;">■ Software
+                            Sector</span> 디커플링
+                    </p>
+                </div>
 
-<section class="exec-summary">
-  <div class="container">
-    <div class="exec-label">Executive Summary</div>
-    <p>
-      AI 코딩 도구의 개발자 채택률은 <strong>90%</strong>를 넘었습니다.
-      <strong>Vibe Coding</strong>이라는 신조어가 등장한 지 채 1년이 되지 않았는데, 이미 그 말 자체가 무색해졌습니다 — AI로 코딩하는 것이 더 이상 새로운 방식이 아니라 기본값으로 자리잡는 흐름입니다.
-      2026년 2월, AI는 <strong>대답하는 도구</strong>에서 <strong>일하는 도구</strong>로 전환되었으며, 시장은 이미 반응하고 있습니다.
-      에이전트와 모델은 <strong>독립 변수</strong>이며, 두 레이어를 함께 고려하면 보다 정확한 판단이 가능합니다.
-      이 리포트는 바깥이 어디까지 와 있는지를 살펴보고 체험 전 기준선을 형성하기 위한 것이며, 사외 AI Agent Hands-on과 세트로 설계되었습니다.
-    </p>
-  </div>
-</section>
+                <!-- Right: Stats -->
+                <div class="col" style="flex: 1; display: flex; flex-direction: column; gap: 14px;">
+                    <div class="comp-item red-on"
+                        style="flex: 1; min-height: 110px; padding: 22px 24px; border-top-color: rgba(196, 181, 253, 0.5); background: rgba(196, 181, 253, 0.08); border-color: rgba(196, 181, 253, 0.15); box-shadow: 0 8px 24px rgba(0,0,0,0.2);">
+                        <div class="tag" style="color:#D8C8FF; margin-bottom: 6px;">하루 시총 증발 (2025.2 기준)</div>
+                        <p style="font-size: 1.8rem; color:#FFFFFF; text-shadow: 0 2px 10px rgba(196, 181, 253, 0.3);">
+                            <strong>$2,850억</strong>
+                        </p>
+                    </div>
+                    <div class="comp-item yellow-on"
+                        style="flex: 1; min-height: 100px; padding: 20px 24px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);">
+                        <div class="tag" style="margin-bottom: 6px;">SaaS 섹터 총 소실</div>
+                        <p style="font-size: 1.6rem; color:#F2D7A1;"><strong>$1조+</strong></p>
+                    </div>
+                    <div class="comp-item on"
+                        style="flex: 1; min-height: 100px; padding: 20px 24px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);">
+                        <div class="tag" style="margin-bottom: 6px;">핵심 등식 붕괴</div>
+                        <p style="font-size: 1.25rem; line-height:1.4; color:#D8E0F0;">더 많은 직원<br />≠ 더 많은 라이선스</p>
+                    </div>
+                </div>
+            </div>
 
-<nav class="toc">
-  <div class="container">
-    <h2>목차</h2>
-    <div class="toc-grid">
-      <a class="toc-item" href="#s01"><span class="toc-num">01</span><span class="toc-title">리포트 작성 배경</span></a>
-      <a class="toc-item" href="#s06"><span class="toc-num">06</span><span class="toc-title">역할의 변화</span></a>
-      <a class="toc-item" href="#s02"><span class="toc-num">02</span><span class="toc-title">시장 반응 — SaaSpocalypse</span></a>
-      <a class="toc-item" href="#s07"><span class="toc-num">07</span><span class="toc-title">코딩을 넘어 — 동시다발적 확산</span></a>
-      <a class="toc-item" href="#s03"><span class="toc-num">03</span><span class="toc-title">업계 기준선</span></a>
-      <a class="toc-item" href="#s08"><span class="toc-num">08</span><span class="toc-title">기술적 가능성과 현실 제약의 분리</span></a>
-      <a class="toc-item" href="#s04"><span class="toc-num">04</span><span class="toc-title">핵심 개념 — Model ≠ Agent</span></a>
-      <a class="toc-item" href="#s09"><span class="toc-num">09</span><span class="toc-title">과제</span></a>
-      <a class="toc-item" href="#s05"><span class="toc-num">05</span><span class="toc-title">패러다임 전환</span></a>
-      <a class="toc-item" href="#s10"><span class="toc-num">10</span><span class="toc-title">향후 논의가 필요한 질문들</span></a>
-      <a class="toc-item" href="#appendix"><span class="toc-num">+</span><span class="toc-title">참고 자료</span></a>
+            <p class="sub" style="margin-top: 3vh; color: #D8E0F0;">
+                AI Agent가 데모가 아니라 <span class="em" style="color:#C4B5FD; font-weight:700;">사람들이 직접 쓰고 판단을 내리는 대상</span>이
+                되었다
+            </p>
+        </div>
+        <div class="slide">
+            <div
+                style="display: flex; gap: 4vw; align-items: center; justify-content: center; margin: 6vh 0; width: 100%;">
+                <div
+                    style="text-align: center; color: rgba(255,255,255,0.4); border: 2px dashed rgba(255,255,255,0.2); padding: 40px 30px; border-radius: 12px; width: 240px;">
+                    <i class="ph ph-device-mobile" style="font-size: 5rem; margin-bottom: 1rem;"></i>
+                    <p style="font-size: 1.1rem; font-weight: 500; letter-spacing: -0.02em;">제한된 기능<br />(피처폰)</p>
+                </div>
+                <div style="font-size: 2.5rem; color: rgba(255,255,255,0.1);"><i class="ph-bold ph-x"></i></div>
+                <div
+                    style="text-align: center; color: #5FB3FF; border: 2px solid rgba(95, 179, 255, 0.4); background: rgba(95, 179, 255, 0.1); padding: 40px 30px; border-radius: 12px; width: 240px; box-shadow: 0 10px 40px rgba(95, 179, 255, 0.2);">
+                    <i class="ph-fill ph-device-mobile" style="font-size: 5rem; margin-bottom: 1rem;"></i>
+                    <p style="font-size: 1.1rem; font-weight: 700; letter-spacing: -0.02em; color: #FFF;">무한한
+                        확장성<br />(스마트폰)</p>
+                </div>
+            </div>
+            <p class="sub" style="color: #EFF2FA;">"무료 ChatGPT로 AI를 판단하는 것은<br /><span class="em">피처폰으로 스마트폰의 현재를 평가하는
+                    것</span>과 같습니다"</p>
+        </div>
+        <div class="slide mint">
+            <p class="meta" style="color:rgba(255,255,255,0.4);">SECTION 03</p>
+            <h1>업계 기준선</h1>
+            <p class="sub">지금 <span class="em">어디까지</span> 와 있는가</p>
+        </div>
+        <div class="slide in-mint">
+            <div class="stat">
+                <p class="number">90%+</p>
+                <p class="label">개발자 AI 도구 채택률</p>
+            </div>
+            <p class="sub" style="margin-top:3vh;">"우리 엔지니어 중에는 더 이상 직접 코드를 작성하지 않는 사람이 있다"<br />— Dario Amodei,
+                Anthropic
+                CEO</p>
+        </div>
+        <div class="slide surface">
+            <h3>핵심 지표</h3>
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <div class="label">개발자 AI 도구 채택률</div>
+                    <div class="value">90%+</div>
+                    <div class="source">출처: DORA, DX</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">AI 코드 작성 비율 (Amodei)</div>
+                    <div class="value">90%</div>
+                    <div class="source">출처: Anthropic CEO</div>
+                </div>
+                <div class="stat-card green-on">
+                    <div class="label">높은 채택 조직 생산성 향상</div>
+                    <div class="value" style="color:#10E890;">110%+</div>
+                    <div class="source">출처: Jellyfish-OpenAI</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Staff+ 엔지니어 주당 시간 절감</div>
+                    <div class="value">4.4<span style="font-size:1.5rem">시간</span></div>
+                    <div class="source">출처: DX Q4 2025</div>
+                </div>
+            </div>
+        </div>
+        <div class="slide surface">
+            <h3>변화의 속도</h3>
+            <div class="pipeline">
+                <div class="pipeline-step">2023<br />자동완성</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-step">2024<br />채팅 코드생성</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-step on">2025<br />에이전트</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-step green">2026<br />멀티에이전트</div>
+            </div>
+            <p class="sub" style="margin-top:3vh;">의견이 갈리는 지점은 <span class="em">변화가 올 것인가</span>가 아니라<br /><strong>얼마나
+                    빨리,
+                    어디까지</strong> 올 것인가</p>
+        </div>
+        <div class="slide indigo">
+            <p class="meta" style="color:rgba(255,255,255,0.4);">SECTION 04</p>
+            <h1>Model ≠ Agent</h1>
+            <p class="sub"><span class="em">핵심 개념</span> — 독립 변수</p>
+        </div>
+        <div class="slide surface">
+            <h3>Samsung 비유로 이해하는 구조</h3>
+            <div class="arch-layers">
+                <div class="arch-layer">
+                    <div class="role">모델 (두뇌)</div>
+                    <div class="brand">Exynos 2500</div>
+                    <div class="desc">Opus 4.6 / Gemini 3.0 / GPT-5.3</div>
+                </div>
+                <div class="arch-layer on" style="padding: 32px 32px;">
+                    <div class="role">에이전트 (제품)</div>
+                    <div class="brand">Galaxy S 시리즈</div>
+                    <div class="desc" style="color:#7AB8FF; font-weight:700;">Claude Code / Antigravity / Codex</div>
+                </div>
+                <div class="arch-layer">
+                    <div class="role">브랜드 이름</div>
+                    <div class="brand">Galaxy</div>
+                    <div class="desc">Claude / Gemini / GPT</div>
+                </div>
+            </div>
+
+            <div
+                style="display: flex; align-items: center; justify-content: center; gap: 3vw; margin: 4vh 0; background: rgba(20, 40, 160, 0.15); padding: 5vh 4vw; border-radius: 16px; border: 1px solid rgba(95, 179, 255, 0.25); width: 100%; max-width: 850px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+                <div style="text-align: center; flex: 1;">
+                    <i class="ph-fill ph-cpu" style="font-size: 4.5rem; color: #E0E6F0; margin-bottom: 0.8rem;"></i>
+                    <h4 style="color: #FFF; font-size: 1.3rem; margin-bottom: 4px;">Model</h4>
+                    <p style="color: rgba(255,255,255,0.5); font-size: 0.95rem;">보닛 속 엔진</p>
+                </div>
+                <div style="font-size: 2rem; color: #5FB3FF;"><i class="ph-bold ph-plus"></i></div>
+                <div style="text-align: center; flex: 1;">
+                    <i class="ph-fill ph-car-profile"
+                        style="font-size: 4.5rem; color: #A5B4FC; margin-bottom: 0.8rem;"></i>
+                    <h4 style="color: #A5B4FC; font-size: 1.3rem; margin-bottom: 4px;">Agent</h4>
+                    <p style="color: rgba(255,255,255,0.5); font-size: 0.95rem;">조향타와 차체</p>
+                </div>
+                <div style="font-size: 2rem; color: rgba(255,255,255,0.2);"><i class="ph-bold ph-arrow-right"></i></div>
+                <div style="text-align: center; flex: 1;">
+                    <i class="ph-fill ph-rocket-launch"
+                        style="font-size: 5.5rem; color: #10E890; margin-bottom: 0.8rem; filter: drop-shadow(0 0 15px rgba(16, 232, 144, 0.3));"></i>
+                    <h4 style="color: #10E890; font-size: 1.4rem; font-weight: 800;">개발 생산성</h4>
+                </div>
+            </div>
+
+            <p class="sub" style="margin-top:2vh;">같은 모델이라도 <span class="em">어떤 에이전트 위에서 구동하느냐</span>에 따라 성능이 달라진다</p>
+        </div>
+        <div class="slide">
+            <h3>성능 공식</h3>
+            <p class="formula" style="margin:3vh 0; font-size:clamp(2rem,4vw,3rem);">코딩 성능 = <span
+                    class="em">Model</span>
+                × <span class="green">Agent</span> × <span class="yellow">Pilot</span></p>
+            <div class="note warn" style="margin-top:2vh;">
+                <p>세 변수 중 하나라도 0이면 전체가 0</p>
+            </div>
+            <p class="sub" style="margin-top:2vh;">최고의 모델 + 부족한 에이전트 = 성능 미달<br />둘 다 갖춰도 Pilot이 정의 못 하면 = 의미 없음</p>
+        </div>
+        <div class="slide orange">
+            <p class="meta" style="color:rgba(255,255,255,0.4);">SECTION 05</p>
+            <h1>패러다임 전환</h1>
+            <p class="sub"><span class="em">챗봇</span>에서 <span class="em">에이전트</span>로</p>
+            <div
+                style="display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 850px; margin: 7vh 0;">
+                <div style="text-align: center; flex: 1;">
+                    <i class="ph ph-terminal-window"
+                        style="font-size: 4rem; color: rgba(255,255,255,0.3); margin-bottom: 1rem;"></i>
+                    <div style="color: rgba(255,255,255,0.4); font-weight: 500; font-size: 1.1rem;">명령어 (CLI)</div>
+                </div>
+                <div style="font-size: 1.5rem; color: rgba(255,255,255,0.1);"><i class="ph-bold ph-caret-right"></i>
+                </div>
+                <div style="text-align: center; flex: 1;">
+                    <i class="ph ph-cursor-click"
+                        style="font-size: 4rem; color: rgba(255,255,255,0.5); margin-bottom: 1rem;"></i>
+                    <div style="color: rgba(255,255,255,0.6); font-weight: 500; font-size: 1.1rem;">마우스 (GUI)</div>
+                </div>
+                <div style="font-size: 1.5rem; color: rgba(255,255,255,0.1);"><i class="ph-bold ph-caret-right"></i>
+                </div>
+                <div style="text-align: center; flex: 1;">
+                    <i class="ph ph-chat-teardrop-dots"
+                        style="font-size: 4rem; color: #5FB3FF; margin-bottom: 1rem;"></i>
+                    <div style="color: #5FB3FF; font-weight: 600; font-size: 1.1rem;">자연어 (챗봇)</div>
+                </div>
+                <div style="font-size: 1.5rem; color: rgba(255,255,255,0.2);"><i class="ph-bold ph-caret-right"></i>
+                </div>
+                <div style="text-align: center; flex: 1; position: relative;">
+                    <div
+                        style="position: absolute; top: 0; left: 50%; width: 100px; height: 100px; background: rgba(16, 232, 144, 0.2); transform: translate(-50%, -10%); border-radius: 50%; filter: blur(30px);">
+                    </div>
+                    <i class="ph-fill ph-robot"
+                        style="font-size: 5rem; color: #10E890; margin-bottom: 0.5rem; position: relative; z-index: 1;"></i>
+                    <div style="color: #10E890; font-weight: 800; font-size: 1.2rem; position: relative; z-index: 1;">자율
+                        에이전트</div>
+                </div>
+            </div>
+        </div>
+        <div class="slide">
+            <h3>챗봇 vs 에이전트</h3>
+            <div class="comp">
+                <div class="comp-item red-on">
+                    <div class="tag">챗봇</div>
+                    <p>전화 상담원<br />텍스트 출력만<br />1회 질의-응답</p>
+                </div>
+                <div class="comp-item green-on">
+                    <div class="tag">에이전트</div>
+                    <p>파견된 시니어 개발자<br />다단계 자율 실행<br />수시간~수일</p>
+                </div>
+            </div>
+            <p class="sub" style="margin-top:2vh;">챗봇 경험만으로 에이전트를 판단하면 <span class="red">본질적 오해</span>가 발생</p>
+        </div>
+        <div class="slide surface">
+            <h3>대답하는 도구 → 일하는 도구</h3>
+            <div class="arch-layers">
+                <div class="arch-layer">
+                    <div class="role">환경 인식</div>
+                    <div class="brand" style="font-size:1.1rem; color:rgba(255,255,255,0.7)">복사한 텍스트만</div>
+                    <div class="desc" style="color:#5FB3FF; font-weight:700; font-size:1.1rem">전체 파일시스템 인식</div>
+                </div>
+                <div class="arch-layer">
+                    <div class="role">실행 능력</div>
+                    <div class="brand" style="font-size:1.1rem; color:rgba(255,255,255,0.7)">단순 텍스트 출력</div>
+                    <div class="desc" style="color:#5FB3FF; font-weight:700; font-size:1.1rem">파일 수정, 터미널, 도구 실행</div>
+                </div>
+                <div class="arch-layer">
+                    <div class="role">작업 범위</div>
+                    <div class="brand" style="font-size:1.1rem; color:rgba(255,255,255,0.7)">1회 Q&amp;A</div>
+                    <div class="desc" style="color:#5FB3FF; font-weight:700; font-size:1.1rem">수시간~수일 자율 실행</div>
+                </div>
+                <div class="arch-layer on">
+                    <div class="role">오류 대응</div>
+                    <div class="brand" style="font-size:1.1rem; color:rgba(255,255,255,0.7)">사용자가 재질문</div>
+                    <div class="desc" style="color:#5FB3FF; font-weight:700; font-size:1.1rem">자체 감지 → 수정 → 재시도</div>
+                </div>
+            </div>
+        </div>
+        <div class="slide violet">
+            <p class="meta" style="color:rgba(255,255,255,0.4);">SECTION 06</p>
+            <h1>역할의 변화</h1>
+            <p class="sub">"무엇을 만들 것인가"가 새로운 병목</p>
+        </div>
+        <div class="slide">
+            <h3>구현 비용의 붕괴</h3>
+            <blockquote>"코드 작성은 점점 값싼 상품이 되고 있고,<br />정말로 중요한 것은 어떤 <span class="em">질문</span>을 할 수 있느냐"</blockquote>
+            <cite>— Jensen Huang, NVIDIA CEO</cite>
+
+        </div>
+        <div class="slide">
+            <h3>PM : Engineer 비율의 역전</h3>
+            <div class="comp">
+                <div class="comp-item">
+                    <div class="tag">전통적 조직</div>
+                    <p>PM : Engineer<br /><strong>1 : 7</strong></p>
+                </div>
+                <div class="comp-item green-on">
+                    <div class="tag">Andrew Ng 팀</div>
+                    <p>PM : Engineer<br /><strong>2 : 1</strong></p>
+                </div>
+            </div>
+            <p class="sub">엔지니어링 3주 → 1일 압축 · 기획이 새로운 병목</p>
+        </div>
+        <div class="slide">
+            <h3>인지 노동의 심화</h3>
+            <div
+                style="display: flex; align-items: center; justify-content: center; gap: 3vw; margin: 6vh 0; width: 100%; max-width: 850px;">
+                <div style="display: flex; flex-direction: column; gap: 12px; flex: 1;">
+                    <div
+                        style="background: rgba(95, 179, 255, 0.15); border: 1px solid rgba(95, 179, 255, 0.3); padding: 18px 20px; border-radius: 8px; display: flex; align-items: center; gap: 14px; color: #5FB3FF;">
+                        <i class="ph-fill ph-lightning" style="font-size: 1.8rem;"></i> <span
+                            style="font-size: 1.1rem; font-weight: 600;">초고속 AI 생성</span>
+                    </div>
+                    <div
+                        style="background: rgba(95, 179, 255, 0.15); border: 1px solid rgba(95, 179, 255, 0.3); padding: 18px 20px; border-radius: 8px; display: flex; align-items: center; gap: 14px; color: #5FB3FF;">
+                        <i class="ph-fill ph-check-square-offset" style="font-size: 1.8rem;"></i> <span
+                            style="font-size: 1.1rem; font-weight: 600;">쏟아지는 PR</span>
+                    </div>
+                    <div
+                        style="background: rgba(95, 179, 255, 0.15); border: 1px solid rgba(95, 179, 255, 0.3); padding: 18px 20px; border-radius: 8px; display: flex; align-items: center; gap: 14px; color: #5FB3FF;">
+                        <i class="ph-fill ph-chat-centered-text" style="font-size: 1.8rem;"></i> <span
+                            style="font-size: 1.1rem; font-weight: 600;">맥락·결정 요청</span>
+                    </div>
+                </div>
+
+                <div style="color: #FFCF2F; display: flex; flex-direction: column; align-items: center; flex: 0.5;">
+                    <i class="ph-fill ph-funnel" style="font-size: 5.5rem; margin-bottom: 10px;"></i>
+                    <div
+                        style="font-size: 1.1rem; font-weight: 800; letter-spacing: 0.05em; background: rgba(255, 207, 47, 0.2); padding: 4px 12px; border-radius: 4px;">
+                        인지 병목</div>
+                </div>
+
+                <div
+                    style="flex: 1.2; background: rgba(252, 165, 165, 0.1); border: 2px solid rgba(252, 165, 165, 0.3); padding: 40px 30px; border-radius: 12px; text-align: center; box-shadow: 0 10px 40px rgba(252, 165, 165, 0.15);">
+                    <i class="ph-fill ph-user-focus" style="font-size: 6rem; color: #FCA5A5; margin-bottom: 15px;"></i>
+                    <h4 style="color: #F87171; font-size: 1.3rem; line-height: 1.5; font-weight: 500;">모든 것을
+                        확인하고<br />최종 결정해야 하는<br /><span
+                            style="font-weight:900; color:#FFF; font-size: 1.5rem; display: inline-block; margin-top: 6px;">단
+                            한 사람</span></h4>
+                </div>
+            </div>
+            <p class="sub">작업 실행이 빨라질수록, 다음 결정을 내리는 <span class="em">사람이 critical path</span>가 된다</p>
+        </div>
+        <div class="slide">
+            <h3>AI는 증폭기(Amplifier)</h3>
+            <div class="comp">
+                <div class="comp-item green-on">
+                    <div class="tag">성숙한 조직</div>
+                    <p>효과 <strong>가속</strong></p>
+                </div>
+                <div class="comp-item red-on">
+                    <div class="tag">기술 부채 조직</div>
+                    <p>문제 <strong>악화</strong></p>
+                </div>
+            </div>
+            <cite>— Google DORA Report, 2025</cite>
+        </div>
+        <div class="slide">
+            <h3>역할의 재정의</h3>
+            <blockquote>"AI가 구현을 더 많이 처리할수록,<br /><span class="em">아키텍처 사고·보안 인식에 대한 프리미엄</span>은<br />낮아지는 것이 아니라 높아진다"
+            </blockquote>
+            <cite>— Addy Osmani, Google Cloud AI</cite>
+            <p class="sub" style="margin-top:2vh;">시스템 설계·도메인 이해·품질 검증 역량의 가치가 상승</p>
+        </div>
+        <div class="slide cyan">
+            <p class="meta" style="color:rgba(255,255,255,0.4);">SECTION 07</p>
+            <h1>코딩을 넘어</h1>
+            <p class="sub">동시다발적 확산</p>
+        </div>
+        <div class="slide in-cyan">
+            <h3>영상 AI — ByteDance Seedance 2.0</h3>
+            <ul class="list">
+                <li><strong>2026. 2. 12</strong> — ByteDance Seedance 2.0 출시</li>
+                <li>텍스트 입력 → <span class="em">대사·효과음·립싱크</span> 완비 영상</li>
+                <li>MPA, 디즈니, 파라마운트, SAG-AFTRA <strong>즉각 법적 대응</strong></li>
+                <li><span class="em">상업 콘텐츠 즉시 적용 가능</span> 수준의 퀄리티</li>
+            </ul>
+        </div>
+        <div class="slide in-cyan">
+            <h3>Science AI — 새로운 지식의 창출</h3>
+            <ul class="list">
+                <li><strong>2024 노벨 화학상</strong> — AI 단백질 구조 예측 (AlphaFold)</li>
+                <li><strong>GPT-5.2</strong> — 이론 물리학 <span class="em">새 공식 도출</span> + 12시간 자체 증명</li>
+                <li><strong>Gemini 3.0 Deep Think</strong> — Codeforces <span class="em">세계 상위 8등</span></li>
+            </ul>
+            <p class="sub">기존 지식의 정리를 넘어 — <strong>새로운 지식을 창출</strong>하는 단계</p>
+        </div>
+        <div class="slide surface">
+            <h3>메모리 수요의 구조적 전환</h3>
+            <div class="stat-grid">
+                <div class="stat-card" style="grid-column: span 2; padding: 20px;">
+                    <div class="label" style="font-size:1rem; color:#E0E6F0; margin-bottom:4px;">훈련 데이터</div>
+                    <div class="source">텍스트 LLM: 수식~수백 PB vs 영상 AI: 수백~수천 PB</div>
+                    <div class="value" style="color:#7AB8FF; margin-top:8px;">10배+</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">추론 리소스 (1x vs ~10x)</div>
+                    <div class="value" style="color:#7AB8FF;">10배</div>
+                </div>
+                <div class="stat-card red-on">
+                    <div class="label">생성물 크기 (KB vs GB)</div>
+                    <div class="value" style="color:#FCA5A5;">수만 배</div>
+                </div>
+            </div>
+            <div class="note tip">
+                <p>LLM이 선형적이라면, 영상 AI는 지수적 — 메모리 수요 함께 증가</p>
+            </div>
+        </div>
+        <div class="slide teal">
+            <p class="meta" style="color:rgba(255,255,255,0.4);">SECTION 08</p>
+            <h1>기술적 가능성과<br />현실 제약의 분리</h1>
+            <p class="sub">두 질문을 분리하라</p>
+        </div>
+        <div class="slide">
+            <h3>세 가지 영역</h3>
+            <div class="comp">
+                <div class="comp-item green-on"
+                    style="background: rgba(52, 211, 153, 0.04); border-color: rgba(52, 211, 153, 0.20);">
+                    <div class="tag"
+                        style="font-size: 1.6rem; font-weight: 700; color: #34D399; letter-spacing: 0; margin-bottom: 8px;">
+                        A</div>
+                    <p><strong>기술 가능 + 적용 가능</strong><br />사외망 PoC에서<br />AI 코드 분석·리팩토링</p>
+                </div>
+                <div class="comp-item yellow-on"
+                    style="background: rgba(251, 191, 36, 0.04); border-color: rgba(251, 191, 36, 0.20);">
+                    <div class="tag"
+                        style="font-size: 1.6rem; font-weight: 700; color: #FBBF24; letter-spacing: 0; margin-bottom: 8px;">
+                        B</div>
+                    <p><strong>기술 가능 + 적용 불가</strong><br />JIRA 연동,<br />사내망 프론티어 모델</p>
+                </div>
+                <div class="comp-item red-on"
+                    style="background: rgba(248, 113, 113, 0.04); border-color: rgba(248, 113, 113, 0.20);">
+                    <div class="tag"
+                        style="font-size: 1.6rem; font-weight: 700; color: #F87171; letter-spacing: 0; margin-bottom: 8px;">
+                        C</div>
+                    <p><strong>기술 불가</strong><br />100% 신뢰<br />자율 아키텍처</p>
+                </div>
+            </div>
+            <div class="note tip">
+                <p>제약이라면 논의의 여지가 있고, 한계라면 기술 성숙도를 지켜보는 영역</p>
+            </div>
+        </div>
+        <div class="slide surface">
+            <h3>우리 환경의 제약</h3>
+            <div class="arch-layers">
+                <div class="arch-layer">
+                    <div class="role">사내망 보안</div>
+                    <div class="brand" style="font-size:1.1rem; color:rgba(255,255,255,0.7)">프론티어 AI 직접 사용 불가</div>
+                    <div class="desc" style="color:#5FB3FF; font-weight:700;">사외망 구축 (진행 중) →</div>
+                </div>
+                <div class="arch-layer">
+                    <div class="role">코드 보안</div>
+                    <div class="brand" style="font-size:1.1rem; color:rgba(255,255,255,0.7)">외부 서비스 코드 노출 우려</div>
+                    <div class="desc" style="color:#5FB3FF; font-weight:700;">코드 분류 (진행 중) →</div>
+                </div>
+                <div class="arch-layer on">
+                    <div class="role" style="color:#FFCF2F;">조직 인식</div>
+                    <div class="brand" style="font-size:1.1rem; color:rgba(255,255,255,0.8);">체감 부재로 관망</div>
+                    <div class="desc" style="color:#FFCF2F; font-weight:700;">이 발표와 Hands-on의 목적 ★</div>
+                </div>
+            </div>
+        </div>
+        <div class="slide">
+            <h3>사외 Hands-on이 사외망인 이유</h3>
+            <div class="pipeline">
+                <div class="pipeline-step">영역 B 제약<br />일시 제거</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-step on">영역 A 가능성<br />직접 확인</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-step green">제약 풀어갈<br />순서 논의</div>
+            </div>
+        </div>
+        <div class="slide surface">
+            <h3>과제</h3>
+            <div class="stat-grid" style="margin-top: 2vh;">
+                <div class="stat-card">
+                    <div class="label" style="color:#5FB3FF; font-size:1.1rem; text-transform:none;">내부 시스템 통합</div>
+                    <div class="source" style="font-size:1rem; margin-top:10px;">JIRA, Confluence, Bitbucket 연동</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label" style="color:#5FB3FF; font-size:1.1rem; text-transform:none;">일하는 방법의 변화</div>
+                    <div class="source" style="font-size:1rem; margin-top:10px;">SOP 전반 재검토</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label" style="color:#5FB3FF; font-size:1.1rem; text-transform:none;">CI/CD 통합</div>
+                    <div class="source" style="font-size:1rem; margin-top:10px;">파일럿 프로젝트 검증</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label" style="color:#5FB3FF; font-size:1.1rem; text-transform:none;">리소스와 비용</div>
+                    <div class="source" style="font-size:1rem; margin-top:10px;">라이선스, 인프라, 교육</div>
+                </div>
+            </div>
+            <div class="note warn">
+                <p>가능한 것의 범위를 먼저 확인하면, 제약의 무게도 가늠할 수 있습니다</p>
+            </div>
+        </div>
+        <div class="slide surface">
+            <h3>함께 논의할 질문들</h3>
+            <div style="display:flex; flex-direction:column; gap:2vh; margin-top:3vh;">
+                <div class="impact-sub" style="margin-top:0;"><strong style="color:#FFF;">준비</strong> — 우린 무엇을 준비해야 하는가?
+                </div>
+                <div class="impact-sub" style="margin-top:0;"><strong style="color:#FFF;">자율화</strong> — 어디까지 위임할 것인가?
+                </div>
+                <div class="impact-sub" style="margin-top:0;"><strong style="color:#FFF;">실행</strong> — 지금 당장 할 수 있는 것은?
+                </div>
+                <div class="impact-sub" style="margin-top:0;"><strong style="color:#FFF;">방향</strong> — 어떤 순서로 전환할 것인가?
+                </div>
+            </div>
+        </div>
+        <div class="slide samsung">
+            <p class="meta" style="color:rgba(255,255,255,0.4);">PART II</p>
+            <h1>어떻게 일해야<br />하는가</h1>
+            <p class="sub">리더·시니어 개발자를 위한 <span class="em">실무 방법론</span></p>
+        </div>
+        <div class="slide orange">
+            <p class="meta" style="color:rgba(255,255,255,0.4);">SECTION 11</p>
+            <h1>가속 곡선의 구조</h1>
+            <p class="sub">속도가 <span class="em">일정하지 않습니다</span></p>
+            <div
+                style="margin: 6vh 0; width: 100%; max-width: 750px; display: flex; align-items: flex-end; height: 180px; border-bottom: 2px solid rgba(255,255,255,0.15); border-left: 2px solid rgba(255,255,255,0.15); padding: 0 20px; position: relative;">
+                <!-- Line -->
+                <svg width="100%" height="100%" viewBox="0 0 600 160" style="position: absolute; bottom: 0; left: 10px;"
+                    preserveAspectRatio="none">
+                    <path d="M 20 145 C 250 145, 400 120, 500 20" fill="none" stroke="#5FB3FF" stroke-width="4"
+                        stroke-linecap="round" />
+                    <circle cx="150" cy="145" r="5" fill="#A5B4FC" />
+                    <circle cx="350" cy="133" r="7" fill="#10E890" />
+                    <circle cx="500" cy="20" r="9" fill="#FBCF80" />
+                </svg>
+                <div
+                    style="position: absolute; bottom: -40px; left: 110px; color: rgba(255,255,255,0.4); font-size: 0.9rem; font-weight: 500;">
+                    <i class="ph-fill ph-database" style="margin-right: 4px;"></i>Training
+                </div>
+                <div
+                    style="position: absolute; bottom: -40px; left: 320px; color: rgba(255,255,255,0.6); font-size: 0.9rem; font-weight: 500;">
+                    <i class="ph-fill ph-cpu" style="margin-right: 4px;"></i>Inference
+                </div>
+                <div
+                    style="position: absolute; bottom: -40px; left: 450px; color: #10E890; font-size: 1rem; font-weight: 800;">
+                    <i class="ph-fill ph-robot" style="margin-right: 4px;"></i>Agent 확산
+                </div>
+
+                <div style="position: absolute; top: 0px; right: 60px; text-align: right;">
+                    <div style="color: #FBCF80; font-weight: 800; font-size: 1.5rem; letter-spacing: -0.02em;">기하급수적 수직
+                        팽창</div>
+                    <div style="color: rgba(255,255,255,0.5); font-size: 0.95rem; margin-top: 6px;">작업 지시와 검토의 난이도 급상승
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="slide in-orange">
+            <h3>가속도가 집중되는 구간이 이동합니다</h3>
+            <div class="pipeline">
+                <div class="pipeline-step">Training<br />연산량 증가</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-step">Inference<br />고속화</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-step">Agent<br />병렬화</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-step green">확산<br />← 지금 여기</div>
+            </div>
+            <div
+                style="display: flex; align-items: center; justify-content: center; gap: 4vw; margin: 4vh 0; width: 100%; max-width: 850px;">
+                <div style="display: flex; flex-direction: column; gap: 14px;">
+                    <div
+                        style="display: flex; align-items: center; gap: 16px; background: rgba(255,255,255,0.05); padding: 16px 24px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); width: 260px;">
+                        <i class="ph-fill ph-file-code" style="color: #7AB8FF; font-size: 1.5rem;"></i><span
+                            style="font-size: 1.1rem; color: #E0E6F0; font-weight: 500;">방대한 코드베이스</span>
+                    </div>
+                    <div
+                        style="display: flex; align-items: center; gap: 16px; background: rgba(255,255,255,0.05); padding: 16px 24px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); width: 260px;">
+                        <i class="ph-fill ph-book-open-text" style="color: #10E890; font-size: 1.5rem;"></i><span
+                            style="font-size: 1.1rem; color: #E0E6F0; font-weight: 500;">수백 쪽의 기획 문서</span>
+                    </div>
+                    <div
+                        style="display: flex; align-items: center; gap: 16px; background: rgba(255,255,255,0.05); padding: 16px 24px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); width: 260px;">
+                        <i class="ph-fill ph-chat-centered-text" style="color: #FBCF80; font-size: 1.5rem;"></i><span
+                            style="font-size: 1.1rem; color: #E0E6F0; font-weight: 500;">산발적인 요구사항</span>
+                    </div>
+                </div>
+
+                <div style="color: #FFCF2F; display: flex; flex-direction: column; align-items: center;">
+                    <i class="ph-fill ph-funnel" style="font-size: 4rem;"></i>
+                    <span
+                        style="font-size: 1rem; font-weight: 800; margin-top: 10px; letter-spacing: 0.05em; background: rgba(255, 207, 47, 0.2); padding: 4px 12px; border-radius: 4px;">의도/맥락
+                        주입</span>
+                </div>
+
+                <div
+                    style="text-align: center; background: rgba(196, 181, 253, 0.1); border: 2px solid rgba(196, 181, 253, 0.25); width: 160px; height: 160px; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 40px rgba(196, 181, 253, 0.15);">
+                    <i class="ph-fill ph-robot" style="font-size: 4.5rem; color: #C4B5FD; margin-bottom: 8px;"></i>
+                    <strong style="color: #FFF; font-size: 1.1rem; letter-spacing: -0.02em;">AI 작업자</strong>
+                </div>
+            </div>
+            <div class="note warn" style="margin-top:1vh;">
+                <p>현재의 실질적 병목은 사람이 컨텍스트를 얼마나 빠르고 정확하게 AI에게 전달하느냐입니다</p>
+            </div>
+        </div>
+        <div class="slide">
+            <h3>AI가 빨라져도 인지 부하는 줄지 않습니다</h3>
+            <div class="arch-layers">
+                <div class="arch-layer">
+                    <div class="role" style="width:140px;">속도의 대가</div>
+                    <div class="brand">AI 속도 비례</div>
+                    <div class="desc">검토해야 할 것들의 고속 축적</div>
+                </div>
+                <div class="arch-layer">
+                    <div class="role" style="width:140px;">병렬 작업의 함정</div>
+                    <div class="brand">전체 파악 부담</div>
+                    <div class="desc">Agent가 많아질수록 관리 비용 증가</div>
+                </div>
+                <div class="arch-layer on">
+                    <div class="role" style="width:140px;">불변의 가치</div>
+                    <div class="brand" style="color:#FFF;">가치 판단의 주체</div>
+                    <div class="desc" style="color:#5FB3FF; font-weight:700;">무엇을 만들지는 여전히 사람의 몫</div>
+                </div>
+            </div>
+            <p class="sub" style="margin-top:2vh;">인지 부하를 줄이는 방법은 더 많이 쓰는 것이 아니라<br /><span class="em">더 잘 설계된 구조를 만드는
+                    것</span>
+                — 이것이 Harness의 필요성</p>
+        </div>
+        <div class="slide teal">
+            <p class="meta" style="color:rgba(255,255,255,0.4);">SECTION 12</p>
+            <h1>Harness</h1>
+            <p class="sub">에이전트를 제어하는 구조 — <span class="em">마구(馬具)</span></p>
+
+            <div
+                style="display: flex; gap: 3vw; align-items: center; justify-content: center; margin: 6vh 0; width: 100%; max-width: 850px;">
+                <div style="text-align: center;">
+                    <i class="ph-fill ph-wind" style="font-size: 5rem; color: #FCA5A5;"></i>
+                    <p
+                        style="color: rgba(255,255,255,0.5); margin-top: 1rem; font-weight: 500; font-size: 1.1rem; line-height: 1.5;">
+                        통제되지 않은<br />야생의 AI 출력물</p>
+                </div>
+                <div style="color: rgba(255,255,255,0.2); font-size: 2.5rem;"><i class="ph-bold ph-plus"></i></div>
+                <div
+                    style="text-align: center; background: rgba(16, 232, 144, 0.1); padding: 30px; border-radius: 16px; border: 2px solid rgba(16, 232, 144, 0.3); box-shadow: 0 10px 40px rgba(16, 232, 144, 0.15);">
+                    <i class="ph-fill ph-shield-check" style="font-size: 5rem; color: #10E890;"></i>
+                    <p style="color: #D8E0F0; margin-top: 1rem; font-weight: 700; font-size: 1.2rem; line-height: 1.4;">
+                        단단한 규칙과 제약<br />(Harness)</p>
+                </div>
+                <div style="color: rgba(255,255,255,0.2); font-size: 2.5rem;"><i class="ph-bold ph-arrow-right"></i>
+                </div>
+                <div style="text-align: center;">
+                    <i class="ph-fill ph-check-circle"
+                        style="font-size: 5.5rem; color: #5FB3FF; filter: drop-shadow(0 0 15px rgba(95, 179, 255, 0.4));"></i>
+                    <p
+                        style="color: #5FB3FF; margin-top: 1rem; font-weight: 800; font-size: 1.2rem; line-height: 1.4; letter-spacing: -0.02em;">
+                        신뢰할 수 있는<br />엔터프라이즈 제품</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide">
+            <h3>Harness의 구성 요소</h3>
+            <div class="grid">
+                <div class="grid-item">
+                    <p class="name em">SOUL Document</p>
+                    <p class="desc">프로젝트 정체성 정의<br />claude.md / agents.md / .rules</p>
+                </div>
+                <div class="grid-item">
+                    <p class="name em">PLAN + PROGRESS</p>
+                    <p class="desc">계획과 진행 상황<br />세션 간 컨텍스트 이어받기</p>
+                </div>
+                <div class="grid-item">
+                    <p class="name em">Commands</p>
+                    <p class="desc">반복 작업 자동화<br />Sub-agent 병렬 실행</p>
+                </div>
+                <div class="grid-item">
+                    <p class="name em">Cron 자동화</p>
+                    <p class="desc">주기적 파이프라인<br />2시간 → 21개 PR merge</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide mint">
+            <p class="meta" style="color:rgba(255,255,255,0.4);">SECTION 13</p>
+            <h1>핵심 원칙</h1>
+            <p class="sub">결과물이 아닌 <span class="em">생성기</span>를 수정하십시오</p>
+        </div>
+        <div class="slide in-mint">
+            <h3>불량품 vs 공정</h3>
+            <div class="comp">
+                <div class="comp-item red-on">
+                    <div class="tag">흔히 하는 방식</div>
+                    <p>AI 초안 → 사람이 직접 수정<br />→ 또 수정 → 또 수정...<br /><br /><span class="red">불량품을 손으로 고치기</span></p>
+                </div>
+                <div class="comp-item green-on">
+                    <div class="tag">올바른 방식</div>
+                    <p>AI 초안 → 왜 틀렸는지 언어화<br />→ 에이전트 자체를 수정 → 재생성<br /><br /><span class="green">제조 공정을 수정하기</span></p>
+                </div>
+            </div>
+        </div>
+        <div class="slide surface">
+            <h3>실용적 적용</h3>
+            <div class="arch-layers">
+                <div class="arch-layer">
+                    <div class="role">결과 불만족</div>
+                    <div class="brand" style="color:#5FB3FF;">각 에이전트의 SOUL Document (.rules 등)에 명시</div>
+                </div>
+                <div class="arch-layer">
+                    <div class="role">반복 오류</div>
+                    <div class="brand" style="color:#5FB3FF;">Command / Sub-agent 규칙화</div>
+                </div>
+                <div class="arch-layer on">
+                    <div class="role">품질 기준</div>
+                    <div class="brand" style="color:#10E890;">self-review 시스템으로 내재화</div>
+                </div>
+            </div>
+            <div class="note tip">
+                <p>초안을 손으로 고치는 시간은 낭비입니다. 그 시간에 에이전트(공장)를 개선하십시오.</p>
+            </div>
+        </div>
+        <div class="slide navy">
+            <p class="meta" style="color:rgba(255,255,255,0.4);">SECTION 14</p>
+            <h1>워크플로우</h1>
+            <p class="sub">어떤 순서로 시작하는가</p>
+        </div>
+        <div class="slide in-blue">
+            <h3>5단계 워크플로우</h3>
+            <div class="arch-layers" style="gap:4px;">
+                <div class="arch-layer" style="padding:16px 24px;">
+                    <div class="role" style="width:70px;">Step 1</div>
+                    <div class="brand" style="font-size:1.15rem;">탐색부터 위임</div>
+                </div>
+                <div class="arch-layer" style="padding:16px 24px;">
+                    <div class="role" style="width:70px;">Step 2</div>
+                    <div class="brand" style="font-size:1.15rem;">탐색 결과를 SOUL Document 이식</div>
+                </div>
+                <div class="arch-layer" style="padding:16px 24px;">
+                    <div class="role" style="width:70px;">Step 3</div>
+                    <div class="brand" style="font-size:1.15rem; color:#5FB3FF;">결과물이 아닌 구조 설계</div>
+                </div>
+                <div class="arch-layer" style="padding:16px 24px;">
+                    <div class="role" style="width:70px;">Step 4</div>
+                    <div class="brand" style="font-size:1.15rem;">비판 루프 내재화</div>
+                </div>
+                <div class="arch-layer on" style="padding:16px 24px;">
+                    <div class="role" style="width:70px;">Step 5</div>
+                    <div class="brand" style="font-size:1.15rem;">사람이 읽는 결과물로 출력</div>
+                </div>
+            </div>
+        </div>
+        <div class="slide">
+            <h3>Claude Code vs Codex — 철학의 차이</h3>
+            <div class="comp">
+                <div class="comp-item">
+                    <div class="tag">Claude Code</div>
+                    <p>"함께 맞춰가는" 방향<br /><br />사람의 의도를 계속 확인<br />과정에서 <span class="em">소외되지 않음</span><br />방향 제어 용이</p>
+                </div>
+                <div class="comp-item">
+                    <div class="tag">Codex</div>
+                    <p>"내가 다 알아서" 방향<br /><br />판단 개입 최소화<br />최고치는 더 높음<br />방향 틀리면 수정 비용 큼</p>
+                </div>
+            </div>
+            <p class="sub">최고치보다 <span class="em">방향 제어 가능성</span>이 실무에서 더 중요한 변수</p>
+        </div>
+        <div class="slide">
+            <h3>소프트웨어의 정의가 바뀌고 있습니다</h3>
+            <div class="comp">
+                <div class="comp-item">
+                    <div class="tag">기존</div>
+                    <p>코드(로직) <strong>70~80%</strong><br />+ 운영 스택 20~30%</p>
+                </div>
+                <div class="comp-item on">
+                    <div class="tag">변화 후</div>
+                    <p>AI 모델(코어) <strong>80%</strong><br />+ 제어 레이어 10%<br />+ UI/UX 10%</p>
+                </div>
+            </div>
+            <div
+                style="display: flex; align-items: center; justify-content: center; margin: 5vh 0; width: 100%; max-width: 850px;">
+                <div
+                    style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); padding: 40px 30px 30px 30px; border-radius: 16px; position: relative; width: 100%;">
+                    <div
+                        style="position: absolute; top: -14px; left: 30px; background: #111422; padding: 0 15px; color: #99ABCA; font-size: 1rem; font-weight: 700; letter-spacing: 0.1em;">
+                        <i class="ph-fill ph-hard-drives" style="margin-right: 8px; vertical-align: middle;"></i>시스템 전체
+                        아키텍처 (Harness)
+                    </div>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap; justify-content: center;">
+                        <div
+                            style="padding: 18px 25px; background: rgba(255,255,255,0.05); border-radius: 8px; color: rgba(255,255,255,0.6); font-weight: 500; font-size: 1.05rem;">
+                            <i class="ph-fill ph-database" style="margin-right:8px;"></i>DB & Storage
+                        </div>
+                        <div
+                            style="padding: 18px 25px; background: rgba(255,255,255,0.05); border-radius: 8px; color: rgba(255,255,255,0.6); font-weight: 500; font-size: 1.05rem;">
+                            <i class="ph-fill ph-shield-check" style="margin-right:8px;"></i>Auth & Security
+                        </div>
+                        <div
+                            style="padding: 18px 25px; background: rgba(255,255,255,0.05); border-radius: 8px; color: rgba(255,255,255,0.6); font-weight: 500; font-size: 1.05rem;">
+                            <i class="ph-fill ph-layout" style="margin-right:8px;"></i>UI/UX Framework
+                        </div>
+                        <div
+                            style="padding: 18px 25px; background: rgba(16, 232, 144, 0.12); border: 2px solid rgba(16, 232, 144, 0.4); border-radius: 8px; color: #10E890; font-weight: 800; font-size: 1.15rem; transform: scale(1.1); box-shadow: 0 0 30px rgba(16, 232, 144, 0.2); margin: 0 15px;">
+                            <i class="ph-fill ph-magic-wand" style="margin-right:8px;"></i>생성형 AI (단 1개의 노드)
+                        </div>
+                        <div
+                            style="padding: 18px 25px; background: rgba(255,255,255,0.05); border-radius: 8px; color: rgba(255,255,255,0.6); font-weight: 500; font-size: 1.05rem;">
+                            <i class="ph-fill ph-plugs-connected" style="margin-right:8px;"></i>3rd Party APIs
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <p class="sub">경쟁력은 어떤 모델을 쓰느냐가 아니라<br /><span class="em">어떤 제어 구조(Harness)로 감싸느냐</span></p>
+        </div>
+        <div class="slide violet">
+            <p class="meta" style="color:rgba(255,255,255,0.4);">SECTION 16</p>
+            <h1>실무 팁</h1>
+            <p class="sub">현장에서 바로 쓸 수 있는 것들</p>
+        </div>
+        <div class="slide in-violet">
+            <h3>Core Tips</h3>
+            <div class="stat-grid" style="margin-top:2vh;">
+                <div class="stat-card">
+                    <div class="label" style="text-transform:none;">버전의 한계</div>
+                    <div class="value" style="font-size:1.5rem; letter-spacing:0; text-transform:uppercase;">2개월 기다리십시오
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="label" style="text-transform:none;">입력의 한계</div>
+                    <div class="value" style="font-size:1.5rem; letter-spacing:0; text-transform:uppercase;">음성 입력을
+                        활용하십시오</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label" style="text-transform:none;">보안 통제</div>
+                    <div class="value" style="font-size:1.5rem; letter-spacing:0; text-transform:uppercase;">VM 안에서
+                        돌리십시오</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label" style="text-transform:none;">프롬프트 철학</div>
+                    <div class="value" style="font-size:1.5rem; letter-spacing:0; text-transform:uppercase;">"먼저 조사해줘"
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="slide in-violet">
+            <h3>Advanced Tips</h3>
+            <div class="stat-grid" style="margin-top:2vh;">
+                <div class="stat-card">
+                    <div class="label" style="text-transform:none;">동시성 한계</div>
+                    <div class="value" style="font-size:1.5rem; letter-spacing:0; text-transform:uppercase;">에이전트당 작업 개수
+                        명시</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label" style="text-transform:none;">시스템 소유권</div>
+                    <div class="value" style="font-size:1.5rem; letter-spacing:0; text-transform:uppercase;">남의 정체성을 부과
+                        마십시오</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label" style="text-transform:none;">메모리 구조</div>
+                    <div class="value" style="font-size:1.5rem; letter-spacing:0; text-transform:uppercase;">
+                        Reference 캐시 구조화</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label" style="text-transform:none;">작업 병렬성</div>
+                    <div class="value" style="font-size:1.5rem; letter-spacing:0; text-transform:uppercase;">멀티 윈도우 병렬
+                        조작</div>
+                </div>
+            </div>
+        </div>
+        <div class="slide">
+            <h3>역량 전환의 방향</h3>
+            <div class="comp">
+                <div class="comp-item green-on">
+                    <div class="tag">개발 배경 인력</div>
+                    <p>AI 기반 → <strong>도메인 확장</strong><br />가장 유리한 전략</p>
+                </div>
+                <div class="comp-item yellow-on">
+                    <div class="tag">도메인 전문가</div>
+                    <p>지금 당장 AI 도구를<br /><strong>직접 써봐야</strong> 합니다</p>
+                </div>
+            </div>
+            <p class="sub">AI 기반을 가진 사람이 도메인을 배우는 속도 &gt;<br />도메인 전문가가 AI를 배우는 속도</p>
+        </div>
+        <div class="slide">
+            <blockquote>"사업이란 물레방아를 어디다 설치하느냐의 문제다.<br />낙차가 큰 곳을 찾고, 거기에 물레방아를 단다.<br /><span class="em">물이 바뀌면 위치를
+                    옮긴다.</span>"
+            </blockquote>
+        </div>
+        <div class="slide">
+            <blockquote>"들어서 아는 것이 아니라<br /><span class="em">해봤으니 안다</span>고 답할 수 있을 때,<br />조직 차원의 의사결정 논의가<br />실질적으로
+                이루어집니다"
+            </blockquote>
+        </div>
+        <div class="slide surface">
+            <h3>Hands-on 개요</h3>
+            <div class="comp">
+                <div class="comp-item on">
+                    <div class="tag">사내 교육</div>
+                    <p>업계 현황·핵심 개념 정리<br />시연·토론<br /><br /><strong>2시간</strong> · SW개발팀 회의실</p>
+                </div>
+                <div class="comp-item green-on">
+                    <div class="tag">사외 Hands-on</div>
+                    <p>AI Agent 직접 체험<br />Claude Cowork · Claude Code<br /><br /><strong>4시간</strong> · 동탄에듀센터 (사외망)
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="slide blue">
+            <h1>Phase Change</h1>
+            <p class="sub" style="margin-top:2vh;">들어서 아는 것과<br />경험하는 것의 차이</p>
+            <p class="meta" style="margin-top:5vh; color:rgba(255,255,255,0.35);">Q &amp; A</p>
+        </div>
     </div>
-  </div>
-</nav>
-
-<!-- ==================== 01 ==================== -->
-<section class="section" id="s01">
-  <div class="container">
-    <div class="section-num">01</div>
-    <h2>리포트 작성 배경</h2>
-    <p class="section-intro">
-      이 자료는 Jensen Huang(NVIDIA CEO), Andrej Karpathy(전 Tesla AI 디렉터), Dario Amodei(Anthropic CEO), Andrew Ng(Google Brain 공동창립자), Demis Hassabis(Google DeepMind CEO), Addy Osmani(Google Cloud AI) 등 AI 업계 최전선 인물들의 공개 발언과, Anthropic·Google·GitHub 등이 발행한 공식 보고서를 기반으로 리서치하여 구성되었습니다.
-    </p>
-    <p>
-      이 리포트는 2026년 2월 현시점, AI 업계와 Agent가 어디까지 와 있는지 함께 살펴보고 기준선을 형성하기 위한 것이며, 누군가에게는 이미 익숙한 이야기일 수 있고 또 누군가에게는 갑작스러운 변화처럼 느껴질 수 있습니다. 사외 AI Agent Hands-on과 세트로 설계되었습니다.
-    </p>
-  </div>
-</section>
-
-<!-- ==================== 02 (개정) ==================== -->
-<section class="section alt-bg" id="s02">
-  <div class="container">
-    <div class="section-num">02</div>
-    <h2>시장 반응<small>SaaSpocalypse (SaaS + Apocalypse)</small></h2>
-    <p>
-      사실 <strong>AI Agent</strong>라는 개념 자체는 이제 그렇게 새롭지 않습니다. 그동안 발표와 데모는 끊이지 않았고, 뉴스 헤드라인도 꾸준히 이어져 왔습니다. 그러나 뉴스에서 보여주는 것과 달리, 실제 업무에 적용하기에는 사용성이 미흡하거나 비용 문제가 뒤따랐습니다. 그런데 2026년 2월, 분위기가 달라졌습니다. 오스트리아 출신 개발자 Peter Steinberger가 만든 오픈소스 에이전트 OpenClaw가 업계를 뒤흔들었고, Anthropic의 Claude Cowork/Code, OpenAI의 Codex가 일반 사용자에게 잇따라 출시되면서, 실제로 일을 해내는 수준의 에이전트가 사람들 손에 쥐어지기 시작했습니다.
-    </p>
-
-    <h3>2.1 "Something Big is Happening"</h3>
-    <p>
-      6년간 AI 스타트업을 운영해온 Matt Shumer(OthersideAI CEO)는 2월 11일 Fortune에 "Something Big is Happening"이라는 기고를 올렸고, 현재 <span class="big-num">수천만 회</span> 이상 조회되었습니다. 그는 이 시점을 "2020년 2월"에 비유합니다. 해외에서 바이러스가 퍼지고 있다는 소식이 들렸지만, 화장지를 비축한다는 사람을 보면 과민반응이라고 생각했던 그때. 그리고 3주 만에 세상 전체가 바뀌었습니다. 그는 지금이 바로 "과장으로 보이는" 단계라고 말합니다.
-    </p>
-    <p>
-      그가 전하는 현실은 이렇습니다. 원하는 것을 평문으로 설명하고 4시간 후 돌아오면, 수만 줄의 코드가 작성되어 있고, AI가 스스로 앱을 열어 버튼을 클릭하며 테스트한 뒤, 자체 기준을 충족했을 때만 "준비되었습니다"라고 보고합니다. 그리고 테스트해보면 대부분 완벽합니다. 그는 이것이 월요일 하루의 일과였다고 적었습니다.
-    </p>
-    <p>
-      이런 경험을 직접 해본 사람들은 자연스럽게 상상력이 확장됩니다. "이게 법률 리서치도 하네?" "CRM(고객관계관리) 입력도 자동으로 되네?" — 그리고 곧바로 다음 질문이 따라옵니다. <em>"그러면 지금 쓰고 있는 이 소프트웨어의 라이선스가, 계속 이만큼 필요한가?"</em>
-    </p>
-
-    <div class="callout warn">
-      대부분의 사람들은 AI의 무료 버전을 사용하고 있는데, 무료 버전은 유료 사용자가 접근하는 것보다 <strong>1년 이상 뒤처져</strong> 있습니다. <strong>무료 ChatGPT로 AI를 판단하는 것은 피처폰으로 스마트폰의 현재를 평가하는 것과 같습니다.</strong> 대중의 인식과 현실 사이의 간극이 지금 가장 위험한 요소입니다 — 이 간극이 준비를 막고 있기 때문입니다.
-      <br><br>— Matt Shumer, "Something Big is Happening"
-    </div>
-
-    <h3>2.2 SaaSpocalypse — 시장의 반응</h3>
-    <p>
-      Shumer의 기고보다 앞서, 시장은 이미 반응하고 있었습니다. 직접적 촉매는 Anthropic의 <strong>Claude Cowork</strong>였습니다. 1월 23일 연구 프리뷰로 먼저 공개된 이 에이전트 도구가, 2월 3일 <strong>법률 업무 자동화 플러그인</strong>을 추가 출시하면서 시장에 충격파를 보냈습니다. 투자자들은 법률 테크 플랫폼뿐 아니라 SaaS 섹터 전반에 대한 우려를 표출했고, 이날 하루에만 소프트웨어 섹터에서 약 2,850억 달러의 시가총액이 증발했습니다.
-    </p>
-    <p>
-      Salesforce, Adobe, ServiceNow 등 대표적인 SaaS 기업들은 2026년 들어 유독 큰 폭의 하락세를 보이고 있으며, 소프트웨어 섹터 전체에서 <strong>1조 달러 이상</strong>의 시가총액이 소실되었습니다. 이것이 <strong>SaaSpocalypse</strong>입니다. 그 배경에는, 20년간 SaaS의 매출 공식이었던 <strong>더 많은 직원 = 더 많은 소프트웨어 라이선스</strong>라는 등식이 흔들릴 수 있다는 판단이 있습니다. AI 에이전트 하나가 10명의 업무를 수행할 수 있다면, 10개의 소프트웨어 시트(seat)가 더 이상 필요하지 않기 때문입니다.
-    </p>
-    <p>
-      주가는 미래를 과대평가하기도, 과소평가하기도 합니다. 실제로 일부 애널리스트들은 이 매도세가 과도하다고 평가하고 있으며, 이 수치 자체가 예언은 아닙니다. 다만 이 사건이 보여주는 것은, AI Agent가 더 이상 데모나 컨셉이 아니라 사람들이 직접 쓰고 판단을 내리는 대상이 되었다는 점입니다.
-    </p>
-  </div>
-</section>
-
-<!-- ==================== 03 ==================== -->
-<section class="section" id="s03">
-  <div class="container">
-    <div class="section-num">03</div>
-    <h2>업계 기준선<small>지금 어디까지 와 있는가</small></h2>
-
-    <h3>3.1 채택률과 산출물</h3>
-    <p>
-      AI 코딩 도구의 개발자 채택률은 <span class="big-num">90%</span>를 넘었습니다.
-      Anthropic CEO Dario Amodei는 "우리 엔지니어 중에는 더 이상 직접 코드를 작성하지 않는 사람이 있다. 모델이 코드를 쓰고, 사람은 편집한다"고 밝혔습니다.
-      높은 채택률을 보이는 조직에서는 생산성이 두 배 이상 향상되었다는 보고가 나오고 있습니다.
-      AI 코딩 도구는 이미 업계 표준으로 자리잡고 있으며, 채택 지연이 경쟁력 리스크로 연결될 가능성이 업계에서 지속적으로 논의되고 있습니다.
-    </p>
-
-    <div class="stat-row">
-      <div class="stat-card">
-        <div class="stat-value">90%+</div>
-        <div class="stat-label">개발자 AI 도구<br>채택률</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">90%</div>
-        <div class="stat-label">AI 코드 작성 비율<br>(Amodei 전망)</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">110%+</div>
-        <div class="stat-label">높은 채택 조직<br>생산성 향상률</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">4.4h</div>
-        <div class="stat-label">Staff+ 엔지니어<br>주당 시간 절감</div>
-      </div>
-    </div>
-
-    <p>
-      이 변화는 설문이 아니라 실제 산출물에서도 확인됩니다. FT(Financial Times) 분석에 따르면, 2022~2023년 거의 제로 성장이었던 지표들이 2024년 말부터 가파르게 상승하고 있습니다.
-    </p>
-
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>지표</th>
-            <th style="text-align:center">2022–2023</th>
-            <th style="text-align:center">2025 (YoY)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>신규 웹사이트</td><td style="text-align:center; color:var(--text-dim)">≈ 0%</td><td style="text-align:center; font-weight:700; color:var(--primary)">+35%</td></tr>
-          <tr><td>신규 iOS 앱</td><td style="text-align:center; color:var(--text-dim)">≈ 0%</td><td style="text-align:center; font-weight:700; color:var(--primary)">+55%</td></tr>
-          <tr><td>GitHub 코드 push (US)</td><td style="text-align:center; color:var(--text-dim)">≈ 0%</td><td style="text-align:center; font-weight:700; color:var(--primary)">+30%</td></tr>
-          <tr><td>GitHub 코드 push (UK)</td><td style="text-align:center; color:var(--text-dim)">≈ 0%</td><td style="text-align:center; font-weight:700; color:var(--primary)">+25%</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="source-note">출처: FT / John Burn-Murdoch (2026.2) — Domain Name Industry Brief; SensorTower; GitHub</p>
-
-    <h3>3.2 변화의 속도</h3>
-
-    <div class="timeline">
-      <div class="tl-item">
-        <span class="tl-year">2023</span>
-        <span class="tl-desc">코드 자동완성</span>
-      </div>
-      <div class="tl-item">
-        <span class="tl-year">2024</span>
-        <span class="tl-desc">채팅 기반 코드 생성</span>
-      </div>
-      <div class="tl-item">
-        <span class="tl-year">2025</span>
-        <span class="tl-desc">에이전트 — 수십 분~수시간 자율 작업</span>
-      </div>
-      <div class="tl-item current">
-        <span class="tl-year">2026 (현재)</span>
-        <span class="tl-desc">멀티에이전트 협업 — 수시간~수일 자율 작업, IDE 통합</span>
-      </div>
-      <div class="tl-item">
-        <span class="tl-year">2027~28 (예측)</span>
-        <span class="tl-desc">모듈 단위 자율 개발</span>
-      </div>
-    </div>
-
-    <p>
-      에이전트가 단독 작업을 넘어 팀 단위 병렬 작업으로 진화하는 변곡점에 서 있습니다.
-      이 변화의 속도와 방향에 대해서는 AI 업계 최전선의 인물들이 놀랄 만큼 일치된 시각을 보이고 있습니다.
-      의견이 갈리는 지점은 <strong>변화가 올 것인가</strong>가 아니라 <strong>얼마나 빨리, 어디까지 올 것인가</strong>입니다.
-    </p>
-
-    <div class="callout">
-      수주의 간격이 의미 있는 차이를 만들 수 있는 속도라는 점은, 이 변화를 바라볼 때 참고할 만한 맥락입니다.
-    </div>
-
-    <p>
-      <strong>붉은 여왕 효과</strong>(Red Queen Effect)라는 개념이 있습니다. 『거울 나라의 앨리스』에서 붉은 여왕이 앨리스에게 한 말에서 유래한 것으로, <em>"이곳에서는 같은 자리에 머물기 위해서라도 있는 힘껏 달려야 한단다"</em>라는 원리입니다. 주변이 빠르게 움직이는 환경에서는, 멈춰 있는 것이 곧 뒤처지는 것이 됩니다.
-    </p>
-    <p>
-      AI 업계의 변화 속도가 이 구조와 닮아 있습니다. 속도보다 방향이 중요한 시점도 있지만, 지금은 보폭 자체를 만들어가는 시점이기도 합니다 — 조직 차원에서도, 각자가 AI 도구 활용 감각을 쌓아가는 개인 차원에서도.
-    </p>
-
-    <h3>3.3 컴파일 언어·임베디드 영역</h3>
-    <p>
-      웹 서비스 중심 기업에서 먼저 폭발적으로 확산된 AI 코딩 도구가, 컴파일 언어·네이티브 개발 환경으로 빠르게 확장되고 있습니다. 임베디드·펌웨어 영역은 아직 개화 초기이지만, 이미 무시할 수 없는 수준의 변화가 관측되고 있습니다.
-    </p>
-    <p>
-      <strong>AI가 AI를 만든다.</strong> OpenAI는 GPT-5.3-Codex가 자기 자신의 개발에 사용된 최초의 모델이라고 밝혔습니다. 초기 버전이 자체 학습 파이프라인의 디버깅, 배포 관리, 테스트 결과 진단에 활용되었습니다. AI가 AI를 만드는 재귀적 구조가 이론이 아닌 실제 제품 개발에서 실현되고 있는 것입니다.
-    </p>
-    <p>
-      <strong>AI가 컴파일러 영역에 진입하고 있다.</strong> LLVM과 GCC 커뮤니티는 AI 도구 기여 정책을 공식 수립하는 단계에 있으며, 컴파일러 — 소프트웨어의 가장 깊은 기반 — 에서도 AI의 역할이 확대되고 있다는 신호가 나타나고 있습니다.
-    </p>
-    <p>
-      <strong>임베디드 전용 AI 도구의 등장.</strong> Embedder와 같은 AI 펌웨어 엔지니어링 플랫폼이 등장하여, C/C++·Rust에 대한 실시간 컴파일 진단, MCU 드라이버 자동 생성, 플래싱 및 디버깅을 지원하기 시작했습니다. AI Agent가 C/C++ 코드 분석, 리팩토링, 테스트 생성에서 이미 유의미한 성능을 보이고 있으며, 확산 속도는 가속되고 있습니다.
-    </p>
-    <div class="callout key">
-      적용 속도와 경로는 분야별로 다를 수 있습니다. 다만 위에서 본 것처럼, AI는 웹 서비스에서 시작해 컴파일러와 펌웨어까지 도달 범위를 넓혀가고 있으며, 그 속도는 가속되고 있습니다.
-    </div>
-  </div>
-</section>
-
-<!-- ==================== 04 ==================== -->
-<section class="section alt-bg" id="s04">
-  <div class="container">
-    <div class="section-num">04</div>
-    <h2>핵심 개념<small>Model ≠ Agent</small></h2>
-
-    <h3>4.1 구조</h3>
-    <p>
-      AI 관련 대화에서 용어 혼동이 자주 일어납니다. 제품명인지, 레이어명인지, 모델명인지 구분이 불명확한 채로 쓰이는 경우가 많고, 같은 단어가 문맥에 따라 다른 의미로 사용되기도 합니다. 이 절은 그 혼동을 정리하기 위해 별도로 구성했습니다.
-    </p>
-    <p>
-      모델과 에이전트는 독립 변수입니다. Samsung에 비유하면 이해하기 쉽습니다. (완전히 1:1로 대응되는 비유는 아니지만, 구조를 이해하는 데 참고용으로 활용합니다.)
-    </p>
-    <p>
-      <strong>Galaxy</strong>, <strong>Galaxy S 시리즈</strong>, <strong>Exynos</strong>는 모두 삼성에서 나왔지만 전혀 다른 것을 지칭합니다. Galaxy는 브랜드명이고, Galaxy S 시리즈는 그 브랜드 아래의 특정 제품군이며, Exynos 2400/2500/2600은 그 안에 탑재된 칩(두뇌)입니다. <strong>Claude, Claude Code, Opus 4.6도 마찬가지입니다.</strong> 같은 Anthropic에서 나왔지만, Claude는 브랜드명이고, Claude Code는 그 브랜드를 쓰는 특정 에이전트 제품이며, Opus 4.6은 그 안에 탑재된 모델(두뇌)입니다.
-    </p>
-
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr><th>역할</th><th>Samsung 비유</th><th>Anthropic</th><th>Google</th><th>OpenAI</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>회사</td><td>Samsung</td><td>Anthropic</td><td>Google</td><td>OpenAI</td></tr>
-          <tr><td>브랜드</td><td>Galaxy</td><td>Claude</td><td>Gemini</td><td>GPT</td></tr>
-          <tr><td>에이전트 (제품)</td><td>Galaxy S 시리즈</td><td>Claude Code / Cowork</td><td>Antigravity / Gemini in Workspace</td><td>Codex (클라우드 + 데스크톱)</td></tr>
-          <tr><td>모델 (탑재 두뇌)</td><td>Exynos 2400 / 2500 / 2600</td><td>Opus 4.6 / Sonnet 4.5 / Haiku 4.5</td><td>Gemini 3.0 Pro / Flash</td><td>GPT-5.3-Codex</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <p>
-      이 구조를 이해하고 나면, 흔히 쓰는 표현들에 얼마나 많은 생략이 있는지 보이기 시작합니다. "Antigravity가 Cursor보다 낫다", "Claude Code가 제일 잘한다"는 말은 이 분야에 익숙한 사람들이 당연하게 여겨 생략한 표현들입니다. 엄밀히는 <em>비슷한 모델 조건에서 전반적으로 낫더라</em>, 또는 <em>특정 에이전트와 특정 모델의 조합이 다른 조합보다 낫다</em>는 의미를 담고 있습니다. 이 맥락에 익숙하지 않은 분들이 오해하는 경우가 많은 것도 이 때문입니다.
-    </p>
-
-    <div class="callout key">
-      에이전트와 모델은 독립 변수이며, 어느 한쪽만으로 전체 성능을 설명할 수 없습니다. <strong>구분이 불명확하면 도구 선정·벤치마크·투자 판단에서 오판 가능성이 커집니다.</strong>
-    </div>
-
-    <p>
-      모델이 성능의 핵심 변수인 것은 분명하지만, 에이전트 레이어 역시 독립적인 가치를 갖기 시작했습니다. OpenClaw 개발자 Peter Steinberger를 두고 OpenAI와 Meta가 영입 경쟁을 벌인 것(2026.2.15)은, 에이전트 구성 역량이 모델과는 별개로 평가받고 있다는 것을 단적으로 보여주는 사례입니다.
-    </p>
-
-    <h3>4.2 성능 공식</h3>
-
-    <div class="formula">
-      <div class="formula-main">코딩 성능 = Model × Agent(Harness) × Pilot</div>
-      <div class="formula-note">세 변수 중 하나라도 0이면 전체가 0입니다.</div>
-      <div class="formula-note" style="margin-top: 12px; font-size: 12px;">* Agent Harness: 모델의 도구·메모리·상태를 관리하며 자율 실행을 가능하게 하는 운영 계층</div>
-    </div>
-
-    <p>
-      최고의 모델을 써도 에이전트가 부족하면 성능이 안 나오고, 둘 다 갖춰도 Pilot이 무엇을 만들어야 하는지 정의하지 못하면 의미가 없습니다.
-    </p>
-  </div>
-</section>
-
-<!-- ==================== 05 ==================== -->
-<section class="section" id="s05">
-  <div class="container">
-    <div class="section-num">05</div>
-    <h2>패러다임 전환<small>챗봇에서 에이전트로</small></h2>
-
-    <h3>5.1 무엇이 달라졌나</h3>
-
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr><th></th><th>챗봇 (ChatGPT 웹, Claude 웹)</th><th>에이전트 (Claude Code, Codex, Cowork)</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>환경 인식</td><td>사용자가 복사한 텍스트만 봄</td><td>프로젝트 전체 파일시스템·업무 도구 접근</td></tr>
-          <tr><td>실행 능력</td><td>텍스트 출력만</td><td>파일 생성/수정, 터미널 실행, 외부 도구 연동</td></tr>
-          <tr><td>작업 범위</td><td>1회 질의-응답</td><td>다단계 자율 실행 (수시간~수일)</td></tr>
-          <tr><td>오류 대응</td><td>사용자가 에러를 복사해서 재질문</td><td>자체 에러 감지 → 수정 → 재시도</td></tr>
-          <tr><td>비유</td><td>전화 상담원</td><td>파견된 시니어 개발자</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <p>
-      SaaSpocalypse를 촉발한 것이 바로 이 전환입니다. AI가 <strong>대답하는 도구</strong>에서 <strong>일하는 도구</strong>로 바뀌면서, 법률 리서치, CRM(고객관계관리) 관리, 데이터 분석 같은 전문 업무를 자율 수행하기 시작했습니다. 시장은 <strong>소프트웨어를 사용하는 인간</strong>이 아니라 <strong>일을 수행하는 소프트웨어</strong>의 시대 가능성에 반응한 것입니다.
-    </p>
-
-    <div class="callout warn">
-      챗봇을 써본 경험만으로 에이전트를 판단하면 본질적 오해가 발생합니다. <strong>이 차이는 말로 설명하는 것과 직접 사용하는 것의 간극이 가장 큰 영역입니다.</strong>
-    </div>
-  </div>
-</section>
-
-<!-- ==================== 06 ==================== -->
-<section class="section alt-bg" id="s06">
-  <div class="container">
-    <div class="section-num">06</div>
-    <h2>역할의 변화<small>"무엇을 만들 것인가"가 새로운 병목</small></h2>
-
-    <h3>6.1 구현 비용의 붕괴</h3>
-    <p>
-      AI 코딩 에이전트가 구현 비용을 극적으로 낮추면서, <strong>무엇을 만들어야 하는지 정의하는 능력</strong>이 새로운 병목이 되고 있습니다. 코드를 빠르게 짜는 것은 이제 AI가 대신할 수 있지만, 풀어야 할 문제를 발견하고 정의하는 것은 여전히 사람의 영역입니다. Jensen Huang의 표현대로, 코드 작성은 점점 값싼 상품이 되고 있고, 정말로 중요한 것은 어떤 질문을 할 수 있느냐입니다.
-    </p>
-
-    <h3>6.2 설계·기획 비중의 확대</h3>
-    <p>
-      일부 선도 조직에서는 구현 중심의 역할이 설계·기획 중심으로 재편되는 사례가 관측되고 있습니다. Andrej Karpathy(전 Tesla AI 디렉터)가 정의한 <strong>Agentic Engineering</strong> — 에이전트의 레버리지를 확보하되 품질 타협은 없는 전문적 AI 기반 개발 — 이 여러 선도 조직에서 새로운 기준으로 채택되는 추세입니다.
-    </p>
-    <p>
-      Karpathy 본인의 워크플로우가 2025년 11~12월 사이 수동 <span class="big-num">80%</span> → 에이전트 <span class="big-num">80%</span>로 역전되었으며, 이를 "20년 프로그래밍 커리어에서 가장 큰 변화"라고 표현했습니다. 그는 LLM 에이전트 역량이 이 시기 "모종의 일관성 임계점"을 넘었으며, 점진적 개선이 아니라 상전이(phase change)로 진단하고 있습니다.
-    </p>
-
-    <div class="callout">
-      단, 그조차 모델의 약점을 명확히 지적합니다. <strong>잘못된 가정 위에 계속 구축, 명확화 질문 없음, 과도한 추상화, 아첨적 경향.</strong> 에이전트 시대에서 Pilot의 검증 역량이 중요한 이유입니다.
-    </div>
-
-    <h3>6.3 PM:Engineer 비율의 역전</h3>
-    <p>
-      AI 업계의 대표적 석학인 Andrew Ng(Google Brain·Coursera 공동창립자)은 2025년 AI Startup School 강연에서 직접 관측한 사례를 공유했습니다. 엔지니어링 시간이 <span class="big-num">3주 → 1일</span>로 압축되자, 제품 기획과 사용자 피드백 수집이 새로운 병목으로 부상했다는 것입니다. 전통적 PM:Engineer 비율 <span class="big-num">1:6~7</span>에서, 그의 팀에서는 <span class="big-num">2:1</span>(PM:Engineer) 배치 제안이 처음으로 나왔습니다.
-    </p>
-    <p>
-      이 제안이 정답인지는 아직 열린 질문이지만, 구현이 아니라 기획이 병목이 되는 시대가 시작되었다는 신호임은 분명합니다. Ng은 한 달에 코드베이스를 <span class="big-num">3번</span> 완전히 재작성하는 팀의 사례를 소개하며, 아키텍처 선택이 더 이상 되돌릴 수 없는 결정이 아니게 되었다고 지적합니다.
-    </p>
-
-    <h3>6.4 새로운 병목 — 인지 노동의 증가</h3>
-    <p>
-      구현이 빨라졌다고 해서 모든 것이 편해진 것은 아닙니다. AI가 생성해내는 수많은 산출물에 대한 <strong>판단과 평가</strong> — 인지 노동의 영역은 오히려 크게 증가하고 있습니다.
-    </p>
-    <p>
-      Harvard Business Review는 2026년 2월 <em>"AI Doesn't Reduce Work — It Intensifies It"</em>이라는 연구를 발표했습니다. 200명 규모 테크 기업 근무자 40명을 8개월간 추적한 결과, AI 도입 후 직원들은 더 빠른 속도로, 더 넓은 범위의 업무를 수행했습니다. 문제는 <strong>절약된 시간이 휴식이나 깊은 사고로 돌아가지 않고 즉시 다른 업무로 채워졌다</strong>는 것입니다. 연구진은 이를 <strong>"업무량 잠행 증가(workload creep)"</strong>라 명명하며, 단기적 생산성 향상이 인지 피로와 의사결정 품질 저하로 이어질 수 있다고 경고합니다.
-    </p>
-    <p>
-      개발 영역에서는 이 현상이 더 구체적으로 관측됩니다. METR(Model Evaluation &amp; Threat Research)의 무작위 대조 시험(RCT)은 숙련된 오픈소스 개발자 16명을 대상으로, AI 도구 사용 시 실제 작업 완료 시간이 <span class="big-num">19%</span> 더 길어졌다는 결과를 보고했습니다. 더 주목할 점은, 개발자 본인들은 AI가 자신을 <span class="big-num">20%</span> 빠르게 해주었다고 체감했다는 것입니다. <strong>인지적 착각과 실제 성과 사이의 괴리</strong>가 존재하며, 이는 AI 생성물의 검토·수정·통합에 소요되는 비가시적 인지 노동이 과소평가되고 있음을 시사합니다.
-    </p>
-    <p>
-      Google의 DevOps 연구 프로그램인 <strong>DORA</strong>(DevOps Research and Assessment)의 2025년 보고서도 같은 구조를 확인합니다. 개인 단위 산출량(PR 수, 완료 태스크)은 증가했지만, <strong>조직 수준의 소프트웨어 딜리버리 지표는 정체</strong>되어 있습니다. DORA는 AI를 <strong>"증폭기(amplifier)"</strong>로 규정합니다 — 성숙한 엔지니어링 프랙티스를 갖춘 조직에서는 효과가 가속되지만, 기술 부채와 프로세스 병목이 있는 조직에서는 오히려 문제를 악화시킨다는 것입니다.
-    </p>
-
-    <div class="callout warn">
-      AI가 대체하는 것은 구현 노동입니다. 그러나 <strong>생성물을 판단하고, 맥락에 맞게 검증하고, 품질을 보증하는 인지 노동</strong>은 줄어들지 않았고, 오히려 그 비중과 중요도가 높아지고 있습니다.
-    </div>
-
-    <h3>6.5 숙련 엔지니어의 역할 증대와 주니어의 도전</h3>
-    <p>
-      인지 노동의 비중이 커질수록, <strong>숙련된 시니어 엔지니어의 역할은 증대</strong>됩니다. Addy Osmani(Google Cloud AI)가 지적한 대로, 시스템 설계·보안·성능에 대한 깊은 이해를 가진 엔지니어에게 AI는 "거대한 힘의 배율기"로 작용합니다. AI가 구현을 더 많이 처리할수록 아키텍처 사고와 보안 인식에 대한 프리미엄은 낮아지는 것이 아니라 오히려 높아집니다.
-    </p>
-    <p>
-      반면, 주니어 개발자들은 구조적으로 더 어려운 환경에 놓이고 있습니다. 2025년 LeadDev 조사에 따르면 엔지니어링 리더의 <span class="big-num">54%</span>가 AI 코파일럿 덕분에 주니어 채용을 줄일 계획이라고 응답했습니다. AI가 주니어의 학습 기회였던 저위험 업무(UI 수정, 단위 테스트 등)를 자동화하면서, 성장의 사다리 자체가 흔들리고 있는 것입니다. 동시에 시니어 엔지니어의 코드 리뷰 부담은 가중되고 있습니다. AI 도구를 활용한 주니어가 더 많은 코드를 더 빠르게 생산하지만, 그 산출물의 품질을 검증하는 책임은 시니어에게 집중됩니다.
-    </p>
-    <p>
-      주니어의 진입 기회가 줄고, 시니어의 검증 부담이 늘어나는 경향은 업계 전반에서 관측되고 있습니다.
-    </p>
-  </div>
-</section>
-
-<!-- ==================== 07 ==================== -->
-<section class="section" id="s07">
-  <div class="container">
-    <div class="section-num">07</div>
-    <h2>코딩을 넘어<small>동시다발적 확산</small></h2>
-    <p class="section-intro">
-      AI의 영향은 코딩 영역에 국한되지 않습니다. 같은 시기에 인접 산업에서 유사한 전환이 관측되고 있으며, 이 확산은 우리의 수요 구조와도 연결됩니다.
-    </p>
-
-    <h3>7.1 영상·콘텐츠 제작</h3>
-    <p>
-      2026년 2월 12일 ByteDance가 <strong>Seedance 2.0</strong>을 출시하자, MPA(미국영화협회), 디즈니, 파라마운트, SAG-AFTRA가 잇따라 법적 대응과 공식 규탄에 나섰습니다. 텍스트만 입력하면 대사·효과음·립싱크까지 완비된 영상이 나오는 수준이 되자, 할리우드가 즉각 반응한 것입니다. 특히 Seedance 2.0은 기존 AI 영상 도구와 달리 <strong>상업 콘텐츠에 즉시 적용 가능한 수준의 퀄리티</strong>로 업계를 놀라게 하고 있습니다. AI 영상 생성이 이론적 가능성에서 산업적 현실로 넘어왔음을 보여주는 사건입니다. (<a href="https://www.youtube.com/watch?v=csjGCIhIKzs&t=15s" target="_blank" rel="noopener">Seedance 2.0 영상 보기 →</a>)
-    </p>
-    <p>
-      그동안 AI 영상 생성은 일부 얼리 어답터의 실험적 놀이이거나, 짧은 클립을 만들어 SNS에 공유하는 재미 요소에 가까웠습니다. 그러나 품질이 임계점을 넘으면서, 이 기술이 일반 사용자의 일상적 도구로 다가오는 것은 시간문제로 보입니다. 코딩 에이전트가 개발자의 업무 방식을 바꾸고 있듯, 영상 AI 역시 콘텐츠 제작의 문턱을 근본적으로 낮추는 방향으로 확산될 것입니다.
-    </p>
-
-    <h3>7.2 Science AI</h3>
-    <p>
-      2024년 노벨 화학상이 AI 단백질 구조 예측 연구(Google DeepMind의 AlphaFold 등)에 돌아간 데 이어, 2025~2026년에는 AI가 기존 지식의 정리를 넘어 <strong>새로운 지식을 창출</strong>하기 시작했습니다. GPT-5.2는 이론 물리학에서 새로운 공식을 도출하고 <span class="big-num">12시간</span> 만에 자체 증명을 완성했으며, Gemini 3.0 Deep Think은 코딩 경진대회(Codeforces)에서 전 세계 상위 <span class="big-num">8등</span> 수준을 기록했습니다.
-    </p>
-
-    <h3>7.3 우리와의 접점 — 수요 구조의 전환</h3>
-    <p>
-      AI가 스토리지 수요를 키우고 있다는 것은 우리가 가장 잘 아는 이야기입니다. 여기서 짚고 싶은 것은 수요의 크기가 아니라 <strong>수요의 성격이 바뀌고 있다</strong>는 점입니다.
-    </p>
-    <p>
-      텍스트 LLM의 응답 한 건은 약 4KB입니다. 현재 영상 생성 AI가 만들어내는 1080p 10초 클립은 평균 20~30MB — 단일 산출물 기준으로 <strong>수천 배</strong>이며, 해상도와 길이가 올라가면 수만 배 이상으로 벌어집니다. 여기에 학습 데이터의 규모, 추론 중 KV 캐시, 생성물의 저장·전송까지 더하면, 텍스트 시대와는 부하의 차수(order) 자체가 다릅니다. Gartner는 GenAI 솔루션 중 멀티모달 비중이 2023년 1%에서 2027년 <span class="big-num">40%</span>로 확대될 것으로 예측하고 있습니다 — 텍스트 중심이었던 수요 구조가 영상·멀티모달로 이동하는 것입니다.
-    </p>
-    <p>
-      NVIDIA가 CES 2026에서 발표한 <strong>ICMS(Inference Context Memory Storage Platform)</strong>는 이 전환의 구체적 신호입니다. KV 캐시를 HBM에만 담지 않고 DRAM과 NVMe SSD로 계층화하여 페타바이트 규모까지 확장하는 구조인데, Dell·HPE·IBM·Pure Storage 등 12개 파트너가 참여하고 2026년 하반기 출시 예정입니다. 추론 인프라에서 스토리지의 역할이 공식적으로 재정의되는 시점입니다.
-    </p>
-
-    <div class="callout key">
-      LLM이 데이터센터의 메모리 수요를 선형적으로 키웠다면, 영상·멀티모달 AI는 그 곡선의 기울기를 바꾸고 있습니다. 여기에 월드 모델(World Model — 물리 법칙·공간·시간을 이해하고 시뮬레이션하는 AI)까지 본격화되면, 이 증가세는 더 가속될 수 있습니다.
-    </div>
-
-  </div>
-</section>
-
-<!-- ==================== 08 ==================== -->
-<section class="section alt-bg" id="s08">
-  <div class="container">
-    <div class="section-num">08</div>
-    <h2>기술적 가능성과<br>현실 제약의 분리</h2>
-    <p class="section-intro">
-      AI Agent의 역량을 판단할 때, <strong>기술적으로 가능한가</strong>와 <strong>우리 환경에서 적용 가능한가</strong>는 별개의 질문입니다. 이 두 가지를 분리하면 보다 정확한 판단이 가능해집니다.
-    </p>
-
-    <h3>8.1 세 가지 영역</h3>
-
-    <div class="zone-grid">
-      <div class="zone zone-a">
-        <div class="zone-label">A</div>
-        <div class="zone-desc"><strong>기술적으로 가능하고 적용도 가능</strong><br>지금 당장 우리 환경에서 실행할 수 있는 것</div>
-        <div class="zone-example">예: 사외망 PoC 환경에서의 AI 코드 분석·리팩토링·테스트 생성</div>
-      </div>
-      <div class="zone zone-b">
-        <div class="zone-label">B</div>
-        <div class="zone-desc"><strong>기술적으로 가능하지만 제약으로 적용 불가</strong><br>기술은 있지만 보안·인프라·프로세스가 막는 것</div>
-        <div class="zone-example">예: Agent의 JIRA/Confluence 연동, 사내망 프론티어 모델 직접 사용</div>
-      </div>
-      <div class="zone zone-c">
-        <div class="zone-label">C</div>
-        <div class="zone-desc"><strong>기술적으로 아직 불가능</strong><br>현재 AI 기술 자체의 한계</div>
-        <div class="zone-example">예: 100% 신뢰할 수 있는 자율 아키텍처 설계, 도메인 완전 이해</div>
-      </div>
-    </div>
-
-    <div class="callout key">
-      실무에서 관심이 집중되는 영역은 <strong>B</strong>입니다. "안 된다"고 판단된 항목 중 상당수가 기술적 한계(C)가 아니라 환경적 제약(B)에 해당하는 경우가 많습니다. 물론 제약이라고 해서 모두 쉽게 해결되는 것은 아닙니다 — 보안, 비용, 프로세스 등 고려 요소가 많습니다. <strong>다만 제약이라면 논의의 여지가 있고, 한계라면 기술 성숙도를 지켜보는 영역이 됩니다.</strong> 이 구분이 명확해지면 우선순위 설정이 한결 수월해집니다.
-    </div>
-
-    <h3>8.2 우리 환경에의 적용</h3>
-
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr><th>제약 유형</th><th>현재 상태</th><th>해결 경로</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>사내망 보안</td><td>프론티어 AI 직접 사용 불가</td><td>사외망 별도망 구축 (진행 중)</td></tr>
-          <tr><td>코드 보안 레벨</td><td>외부 서비스에 코드 노출 우려</td><td>코드별 보안 레벨 재점검 및 코드 분류 (진행 중)</td></tr>
-          <tr><td>인프라·형상관리</td><td>기존 프로세스와 미연동</td><td>CI/CD 통합 파일럿 (계획)</td></tr>
-          <tr><td>SOP·프로세스</td><td>AI 산출물을 직접 확인하는 구조</td><td>품질 게이트·리뷰 기준 재설계 (설계 필요)</td></tr>
-          <tr><td>조직 인식</td><td>체감 부재로 관망</td><td>← 이 리포트와 Hands-on의 목적</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <p>
-      사외 AI Agent Hands-on이 사외망에서 진행되는 이유가 여기에 있습니다. 영역 B의 제약을 일시적으로 제거한 환경에서 영역 A의 가능성을 직접 확인하는 것입니다. 기술적으로 무엇이 되는지를 먼저 확인하면, 우리 환경에서 어떤 제약을 어떤 순서로 풀어갈지에 대한 논의로 자연스럽게 이어질 수 있습니다.
-    </p>
-  </div>
-</section>
-
-<!-- ==================== 09 ==================== -->
-<section class="section" id="s09">
-  <div class="container">
-    <div class="section-num">09</div>
-    <h2>과제</h2>
-    <p class="section-intro">
-      현재 사외 SOTA(State-of-the-Art) 서비스에 대한 PoC가 진행 중입니다. 동시에, 조직 차원에서 실질적으로 활용하려면 함께 풀어가야 할 과제들이 뒤를 잇고 있습니다.
-    </p>
-
-    <p>
-      <strong>내부 시스템과의 통합.</strong> Agent가 JIRA, Confluence, Bitbucket 등 사내 서비스와 연동될 때 비로소 이슈 관리, 문서화, 코드 리뷰, 형상관리를 포함한 전체 개발 워크플로우가 재구성될 수 있습니다. 기술적으로는 이미 실현 가능한 영역이지만(영역 B), 사내 보안 정책과 인프라 환경 안에서 어떻게 적용할 수 있는지를 판단해야 합니다.
-    </p>
-    <p>
-      <strong>일하는 방법의 변화.</strong> Agent 도입은 단순한 도구 교체가 아니라 업무 프로세스 자체의 변화를 수반합니다. 코드 리뷰 기준, 품질 게이트, 일정 산정 방식, 산출물 검증 체계 등 기존 SOP 전반에 대한 재검토가 수반될 수 있습니다.
-    </p>
-    <p>
-      <strong>CI/CD 파이프라인 통합.</strong> AI가 생성한 코드가 기존 빌드·테스트·배포 파이프라인에 안정적으로 통합되려면, 파일럿 프로젝트를 통한 검증과 단계적 확대가 필요합니다.
-    </p>
-    <p>
-      <strong>리소스와 비용.</strong> 사외 프론티어 서비스 사용에 따른 라이선스 비용, 사외망 인프라 확장, 보안 검토 인력, 교육 리소스 등 조직 차원의 투자 판단이 수반됩니다.
-    </p>
-
-    <div class="callout key">
-      가능한 것의 범위가 먼저 그려지면, 제약의 무게를 가늠하는 것도 한결 수월해집니다.
-    </div>
-  </div>
-</section>
-
-<!-- ==================== 10 ==================== -->
-<section class="section alt-bg" id="s10">
-  <div class="container">
-    <div class="section-num">10</div>
-    <h2>향후 논의가<br>필요한 질문들</h2>
-    <p class="section-intro">
-      아래 질문들은 이 자리에서 즉답을 구하기 위한 것이 아닙니다. 사외 AI Agent Hands-on을 통해 직접 체험한 후 각자의 도메인 단위로 다양한 의견을 도출하는 것을 목표로 합니다.
-    </p>
-
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr><th style="width:20%">영역</th><th>질문</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>준비</td>
-            <td>AI 시대에 우리 조직은 무엇을 준비해야 하는가? 어떤 SOP를 새롭게 구축해야 하는가?</td>
-          </tr>
-          <tr>
-            <td>자율화</td>
-            <td>현재 업무 중 AI Agent에게 위임할 수 있는 영역은 어디인가?</td>
-          </tr>
-          <tr>
-            <td>제약 하의 실행</td>
-            <td>사내망·보안·프로세스 제약 하에서 지금 당장 할 수 있는 것은 무엇인가?</td>
-          </tr>
-          <tr>
-            <td>가능성과 제약의 분리</td>
-            <td>"안 된다"고 판단한 것 중, 기술적 한계(C)인가 환경적 제약(B)인가?</td>
-          </tr>
-          <tr>
-            <td>역량 전환</td>
-            <td>구성원에게 요구되는 역량이 어떻게 달라지며, 어떤 순서로 전환할 것인가?</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="callout key">
-      들어서 아는 것과 <strong>해봤으니 아는 것</strong> 사이의 간격이 좁혀질수록, 조직 논의에서 나오는 판단과 인사이트도 한 층 선명해집니다.
-    </div>
-
-    <p>
-      이 리포트는 그 논의를 시작하기 위한 보조 자료이며, 아래의 사외 AI Agent Hands-on에서 직접 체험한 뒤 각자의 도메인에서 위 질문들을 함께 논의하는 자리로 이어집니다.
-    </p>
-
-    <h3>Hands-on 개요</h3>
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr><th style="width:20%">구분</th><th>사내 교육</th><th>사외 Hands-on</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>목적</td><td>업계 현황·핵심 개념 정리·시연·토론</td><td>AI Agent 직접 체험</td></tr>
-          <tr><td>시간</td><td>2시간</td><td>4시간 (반나절)</td></tr>
-          <tr><td>장소</td><td>SW개발팀 회의실</td><td>동탄에듀센터 (사외망)</td></tr>
-          <tr><td>체험 내용</td><td>Agent 동작 시연, 기술 한계 vs 환경 제약 토론</td><td>Claude Cowork (업무 자동화), Claude Code (코드 분석·리팩토링), 관심 업무 자유 체험</td></tr>
-          <tr><td>기대 산출물</td><td colspan="2">조직별 AI 적용 가능 영역 1~2개 식별, 되는 것 / 막혀 있는 것 / 아직 안 되는 것 구분 기준 형성</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p style="font-size: 14px; color: var(--text-dim);">
-      대상 범위·일정·회차는 별도 협의 예정입니다. 사외망에서 진행하는 이유는 환경 제약을 일시적으로 제거한 상태에서 기술적 가능성의 범위를 확인하기 위함입니다.
-    </p>
-  </div>
-</section>
-
-<!-- ==================== 마치며 (개정) ==================== -->
-<section class="section" id="closing">
-  <div class="container">
-    <h2>마치며</h2>
-    <p>
-      이 리포트는 AI Agent를 활용하여 작성되었습니다. 자료 수집과 인사이트 도출은 NotebookLM, 관련 리포트·사례 조사는 Claude Cowork, HTML 문서 구성은 Claude Code로 처리했습니다. 작성자가 직접 타이핑한 본문은 없으며, 역할은 구조 설계, 팩트체크, 최종 검증이었습니다. 수백 건의 해외 리포트·뉴스·기술 문서를 참조했는데, Agent가 초안을 만들수록 사람의 역할은 작성에서 검증으로 이동했습니다 — DORA에서 실제로 조사한 내용인지, FT에 기고된 실제 뉴스인지, Fortune지에 실제 등록된 기사인지를 확인하는 것이 Pilot의 일이었습니다. 본문에서 다룬 인지 노동의 증가를 직접 체감한 과정이기도 했습니다.
-    </p>
-    <p>
-      이 문서의 워크플로우를 Skill로 복제하면, 다음에 같은 종류의 리포트를 작성할 때 소요 시간은 수분의 1로 줄어들 수 있습니다. 리서치에 가까운 문서이기에 가능한 방식이고, 모든 종류의 문서에 적용할 수 있는 것은 아닙니다. 다만, 이전이라면 한 사람이 시도조차 어려웠을 범위의 작업이 가능해졌다는 것 — 이것 역시 본문에서 다룬 변화의 일부입니다.
-    </p>
-
-  </div>
-</section>
-
-<!-- ==================== 참고 자료 ==================== -->
-<section class="section appendix" id="appendix">
-  <div class="container">
-    <h2>참고 자료</h2>
-
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr><th>자료</th><th>출처</th><th>본문</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>2025 DORA Report</td><td>Google</td><td>3.1, 6.4</td></tr>
-          <tr><td>DX AI-assisted Engineering Q4 2025</td><td>DX</td><td>3.1</td></tr>
-          <tr><td>Jellyfish-OpenAI 공동연구</td><td>McKinsey 인터뷰</td><td>3.1</td></tr>
-          <tr><td>2026 Agentic Coding Trends Report</td><td>Anthropic</td><td>3.2</td></tr>
-          <tr><td>FT AI Impact on Software Output</td><td>John Burn-Murdoch (2026.2)</td><td>3.1</td></tr>
-          <tr><td>Matt Shumer — "Something Big is Happening"</td><td>Fortune (2026.2.11)</td><td>2.1</td></tr>
-          <tr><td>SaaSpocalypse 보도</td><td>Bloomberg, CNBC, Inc., Fortune 등 (2026.2)</td><td>2.2</td></tr>
-          <tr><td>OpenClaw / OpenAI 영입 보도</td><td>CNBC, TechCrunch, Bloomberg 등 (2026.2.15)</td><td>4.1</td></tr>
-          <tr><td>Andrew Ng — AI Startup School / Buildathon Keynote</td><td>DeepLearning.AI (2025)</td><td>6.3</td></tr>
-          <tr><td>Andrej Karpathy — Agentic Engineering (X post)</td><td>2026.1</td><td>6.2</td></tr>
-          <tr><td>Dario Amodei — CFR / WEF / 미 상원 증언</td><td>2025~2026</td><td>3.1</td></tr>
-          <tr><td>Demis Hassabis — Axios AI+ Summit / Fortune</td><td>2025~2026</td><td>3.2, 7.2</td></tr>
-          <tr><td>Ilya Sutskever — Dwarkesh Podcast</td><td>2025.11</td><td>3.2</td></tr>
-          <tr><td>Jensen Huang — No Priors / CES / COMPUTEX / GTC</td><td>NVIDIA, 2025</td><td>6.1, 7.3</td></tr>
-          <tr><td>Addy Osmani — Agentic Engineering / AI's 70% Problem</td><td>Google Cloud AI, 2025~2026</td><td>6.5</td></tr>
-          <tr><td>"AI Doesn't Reduce Work — It Intensifies It"</td><td>Harvard Business Review (2026.2)</td><td>6.4</td></tr>
-          <tr><td>METR — AI Impact on Experienced OS Dev Productivity (RCT)</td><td>METR (2025.7)</td><td>6.4</td></tr>
-          <tr><td>LeadDev — Junior Developer Hiring Survey</td><td>LeadDev (2025)</td><td>6.5</td></tr>
-          <tr><td>NVIDIA ICMS Platform / BlueField-4 발표</td><td>NVIDIA (CES 2026.1)</td><td>7.3</td></tr>
-          <tr><td>GenAI 멀티모달 비중 전망 (1% → 40%)</td><td>Gartner (2024.9)</td><td>7.3</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</section>
-
-<footer class="footer">
-  <div class="footer-line"></div>
-  <p>김학민 · SE P/J · 2026. 2</p>
-</footer>
-
+    <nav aria-label="Slide navigation" class="nav"><button aria-label="Previous slide"
+            onclick="prev()">←</button><button aria-label="Next slide" onclick="next()">→</button></nav>
+    <div class="page-num" id="pageNum">1 / 1</div>
+    <script>
+        const slides = document.querySelectorAll('.slide'), total = slides.length;
+        let current = 0;
+        const pageNumEl = document.getElementById('pageNum'), progressEl = document.getElementById('progress');
+        function update() {
+            if (!pageNumEl || !progressEl) return;
+            pageNumEl.textContent = `${current + 1} / ${total}`;
+            progressEl.style.width = total > 1 ? `${(current / (total - 1)) * 100}%` : '100%';
+        }
+        function goTo(i) {
+            if (total === 0) return;
+            if (i < 0) i = 0; if (i >= total) i = total - 1;
+            current = i;
+            document.getElementById('slides').style.transform = `translateX(-${current * 100}vw)`;
+            history.replaceState(null, '', '#' + (current + 1));
+            update();
+        }
+        function next() { goTo(current + 1); }
+        function prev() { goTo(current - 1); }
+        document.addEventListener('keydown', e => {
+            const tag = document.activeElement.tagName;
+            if (tag === 'INPUT' || tag === 'TEXTAREA' || document.activeElement.isContentEditable) return;
+            switch (e.key) {
+                case 'ArrowRight': case ' ': case 'PageDown': e.preventDefault(); next(); break;
+                case 'ArrowLeft': case 'PageUp': e.preventDefault(); prev(); break;
+                case 'Home': e.preventDefault(); goTo(0); break;
+                case 'End': e.preventDefault(); goTo(total - 1); break;
+                case 'f': case 'F':
+                    const el = document.documentElement;
+                    const isFs = document.fullscreenElement || document.webkitFullscreenElement;
+                    if (!isFs) { (el.requestFullscreen || el.webkitRequestFullscreen).call(el)?.catch(() => { }); }
+                    else { (document.exitFullscreen || document.webkitExitFullscreen).call(document)?.catch(() => { }); }
+                    break;
+            }
+        });
+        let tx = 0, ty = 0;
+        document.addEventListener('touchstart', e => { if (e.touches.length > 1) return; tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, { passive: true });
+        document.addEventListener('touchend', e => { if (e.changedTouches.length > 1) return; const dx = tx - e.changedTouches[0].clientX, dy = ty - e.changedTouches[0].clientY; if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) { if (dx > 0) next(); else prev(); } }, { passive: true });
+        const initSlide = parseInt(location.hash.slice(1)) - 1;
+        if (!isNaN(initSlide) && initSlide >= 0) goTo(initSlide); else update();
+    </script>
 </body>
+
 </html>
