@@ -332,6 +332,13 @@
       justify-content: center;
       align-items: center;
       gap: 10px;
+      transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease, filter 0.3s ease;
+    }
+
+    .comp-item:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      filter: brightness(1.1);
     }
 
     .comp-item.on {
@@ -437,6 +444,13 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease, filter 0.3s ease;
+    }
+
+    .grid-item:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+      filter: brightness(1.15);
     }
 
     .grid-item .name {
@@ -645,6 +659,13 @@
       justify-content: center;
       align-items: center;
       gap: 8px;
+      transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease, filter 0.3s ease;
+    }
+
+    .tool-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      filter: brightness(1.1);
     }
 
     .tool-card.recommended {
@@ -725,6 +746,13 @@
       justify-content: center;
       align-items: center;
       gap: 6px;
+      transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease, filter 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 28px 56px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      filter: brightness(1.1);
     }
 
     .stat-card.on {
@@ -781,6 +809,12 @@
       background: #151A2E;
       padding: 24px 32px;
       border-left: 4px solid rgba(255, 255, 255, 0.06);
+      transition: transform 0.3s ease, background 0.3s ease;
+    }
+
+    .arch-layer:hover {
+      transform: translateX(8px);
+      background: #191E36;
     }
 
     .arch-layer.on {
@@ -1121,7 +1155,6 @@
       <ul class="list" style="margin-top:2vh;">
         <li><strong>업계 최전선 인물들</strong>의 공개 발언 + 공식 보고서 기반 리서치</li>
         <li>Jensen Huang, Karpathy, Amodei, Andrew Ng, Hassabis, Osmani</li>
-        <li><strong>조사시찰단의 교훈</strong> — 수용이든 거부든, <span class="em">직접 확인하는 과정</span>을 거쳤다는 점</li>
         <li><strong>이 발표 + 사외 Hands-on</strong> = 세트 설계</li>
       </ul>
     </div>
@@ -1296,19 +1329,19 @@
       <h3>Samsung 비유로 이해하는 구조</h3>
       <div class="arch-layers">
         <div class="arch-layer">
-          <div class="role">모델 (두뇌)</div>
-          <div class="brand">Exynos 2500</div>
-          <div class="desc">Opus 4.6 / Gemini 3.0 / GPT-5.3</div>
-        </div>
-        <div class="arch-layer on" style="padding: 32px 32px;">
-          <div class="role">에이전트 (제품)</div>
-          <div class="brand">Galaxy S 시리즈</div>
-          <div class="desc" style="color:#7AB8FF; font-weight:700;">Claude Code / Antigravity / Codex</div>
-        </div>
-        <div class="arch-layer">
           <div class="role">브랜드 이름</div>
           <div class="brand">Galaxy</div>
           <div class="desc">Claude / Gemini / GPT</div>
+        </div>
+        <div class="arch-layer">
+          <div class="role">에이전트 (제품)</div>
+          <div class="brand">Galaxy S 시리즈</div>
+          <div class="desc">Claude Code / Antigravity / Codex</div>
+        </div>
+        <div class="arch-layer">
+          <div class="role">모델 (두뇌)</div>
+          <div class="brand">Exynos 2500</div>
+          <div class="desc">Opus 4.6 / Gemini 3.0 / GPT-5.3</div>
         </div>
       </div>
 
@@ -1339,9 +1372,6 @@
       <h3>성능 공식</h3>
       <p class="formula" style="margin:3vh 0; font-size:clamp(2rem,4vw,3rem);">코딩 성능 = <span class="em">Model</span>
         × <span class="green">Agent</span> × <span class="yellow">Pilot</span></p>
-      <div class="note warn" style="margin-top:2vh;">
-        <p>세 변수 중 하나라도 0이면 전체가 0</p>
-      </div>
       <p class="sub" style="margin-top:2vh;">최고의 모델 + 부족한 에이전트 = 성능 미달<br />둘 다 갖춰도 Pilot이 정의 못 하면 = 의미 없음</p>
     </div>
     <div class="slide orange">
@@ -1565,6 +1595,18 @@
         <li><strong>Gemini 3.0 Deep Think</strong> — Codeforces <span class="em">세계 상위 8등</span></li>
       </ul>
       <p class="sub">기존 지식의 정리를 넘어 — <strong>새로운 지식을 창출</strong>하는 단계</p>
+    </div>
+    <div class="slide in-cyan">
+      <h3>문서 생성 자율화 (Agentic Workflow)</h3>
+      <div
+        style="width: 100%; max-width: 850px; margin-top: 3vh; border-radius: 12px; overflow: hidden; border: 1px solid rgba(56, 232, 248, 0.3); box-shadow: 0 10px 40px rgba(0,0,0,0.4);">
+        <video src="ai-ppt-making-demo.mp4" autoplay loop muted playsinline
+          style="width: 100%; display: block; object-fit: cover;"></video>
+      </div>
+      <div class="note tip" style="margin-top:2vh; justify-content: center;">
+        <p>기획안을 바탕으로 장표를 구성하고 다이어그램을 배치하는 자율 실행 예시</p>
+      </div>
+      <p class="sub" style="margin-top: 2vh;">단순 텍스트 생성을 넘어 <span class="em">End-to-End 작업 환경 제어</span></p>
     </div>
     <div class="slide surface">
       <h3>메모리 수요의 구조적 전환</h3>
@@ -1910,20 +1952,7 @@
         </div>
       </div>
     </div>
-    <div class="slide">
-      <h3>Claude Code vs Codex — 철학의 차이</h3>
-      <div class="comp">
-        <div class="comp-item">
-          <div class="tag">Claude Code</div>
-          <p>"함께 맞춰가는" 방향<br /><br />사람의 의도를 계속 확인<br />과정에서 <span class="em">소외되지 않음</span><br />방향 제어 용이</p>
-        </div>
-        <div class="comp-item">
-          <div class="tag">Codex</div>
-          <p>"내가 다 알아서" 방향<br /><br />판단 개입 최소화<br />최고치는 더 높음<br />방향 틀리면 수정 비용 큼</p>
-        </div>
-      </div>
-      <p class="sub">최고치보다 <span class="em">방향 제어 가능성</span>이 실무에서 더 중요한 변수</p>
-    </div>
+
     <div class="slide">
       <h3>소프트웨어의 정의가 바뀌고 있습니다</h3>
       <div class="comp">
