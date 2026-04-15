@@ -1,0 +1,527 @@
+h1. Spoq2 — 무수정 시스템 소프트웨어 보안 속성 자동 형식 검증
+
+----
+
+{panel:title=Executive Summary|titleBGColor=#92400e|titleColor=#ffffff|bgColor=#fffbeb|borderColor=#92400e}
+Spoq2는 Columbia University(Ronghui Gu, Jason Nieh 연구팀)가 ASPLOS 2026에서 발표한 형식 검증(formal verification) 프레임워크이며, {*}Best Paper Award Nominee{*} (152편 중 16편)로 선정되었다.
+
+핵심 기여: {*}수정되지 않은 기존 C 시스템 코드{*}의 보안 속성(noninterference 등)을 {*}자동{*} 검증한다. Arm CCA의 TF-RMM, TF-A, SeKVM 하이퍼바이저 등 {*}실제 상용 코드{*}에 적용하여, 수천 줄의 수동 Coq 증명을 200줄 미만으로 축소하고 수일 걸리던 검증을 수 분으로 단축했다. SeKVM의 Linux 6.1 포트 과정에서 실제 락 누락 버그 2건을 발견하기도 했다.
+
+{*}의사결정 관점 요점{*}: 보안 모니터·하이퍼바이저급 "작은 TCB" 영역에서는 실전 적용 가능한 수준에 도달했다. 범용 리눅스 커널 전체 검증은 여전히 비현실적이며, 도입의 최대 병목은 도구 성능이 아니라 {*}invariant 정의를 수행할 수 있는 형식 기법 인력 풀{*}이다.
+{panel}
+
+----
+
+h2. 목차
+
+{toc:maxLevel=2|minLevel=2}
+
+----
+
+h2. 1. 배경 — 이 기술이 왜 주목받는가
+
+h3. 1.1 문제 정의
+
+시스템 소프트웨어(OS 커널, 하이퍼바이저, TEE, 보안 모니터, 펌웨어)는 모든 상위 스택의 신뢰 기반이다. 이 계층에 보안 결함이 하나라도 존재하면 상위의 모든 격리·인증·무결성 보장이 무너진다. 이러한 위험을 {*}수학적으로 제거{*}하는 방법이 형식 검증인데, 그동안은 두 가지 구조적 한계로 실무 적용이 어려웠다.
+
+||장벽||기존 현실||
+|수동 증명 부담|seL4 커널 8,700 LoC 검증에 수십 인년(person-year) 투입. Coq/Isabelle 증명 코드가 원 소스의 수십 배 규모|
+|Solver 폭발|Path/solver explosion으로 Z3 등 SMT solver가 수일 내 타임아웃. 실제 시스템 코드 크기에서 종결되지 않음|
+
+h3. 1.2 관련 시장 맥락
+
+||지표||수치 및 근거||
+|Arm CCA 서버 시장 (2026)|$11.4B, CAGR 13.3% — Azure Cobalt 200이 2026년 GA되며 CCA 네이티브 지원 탑재 예정|
+|Confidential Computing 시장|Fortune BI 기준 2026년 $42.7B → 2034년 $463.9B (CAGR 34.7%)|
+|형식 검증 Copilot 시장|2024년 $1.12B → CAGR 18.6% (2025~2033 전망)|
+
+하드웨어 기밀 컴퓨팅이 상용화 단계에 진입하면서, 그 신뢰 기반이 되는 펌웨어·모니터 스택의 "증명된 안전성"에 대한 수요가 시장의 현실적 요구로 전환되고 있다. Spoq2는 그 수요 곡선과 기술 공급 타이밍이 맞물린 지점에 있다.
+
+----
+
+h2. 2. 기술 핵심 아이디어
+
+h3. 2.1 전체 파이프라인
+
+{note:title=파이프라인 구성도}
+다이어그램은 {{spoq2-pipeline.drawio}} 파일로 제공된다.
+Confluence: draw.io 매크로 삽입 → 편집 아이콘 클릭 → 상단 메뉴 {*}Extras{*} → {*}Edit Diagram{*} → XML 붙여넣기
+{note}
+
+Spoq2는 6단계 파이프라인으로 구성된다. 사용자는 "검증할 속성"만 정의하고, 나머지 추론은 도구가 자동 처리한다.
+
+# {*}Step 1 — Configuration{*}: 사용자가 추상 머신 상태(레지스터, 메모리 객체)와 포인터 비트 범위를 선언
+# {*}Step 2 — IR 추출{*}: Clang으로 C 코드를 LLVM IR/BC로 변환 ({*}원본 C 수정 없음{*})
+# {*}Step 3 — Coq 임베딩{*}: LLVM IR을 Coq(Rocq) 표현으로 번역
+# {*}Step 4 — Inline Transformation{*}: 함수 호출을 정제 규칙으로 인라인하여 self-contained transition 생성
+# {*}Step 5 — Invariant Enumeration{*}: 사용자가 정의한 inductive invariant를 모든 실행 경로에 대해 쿼리 후보로 전개
+# {*}Step 6 — COI Pruning + Z3 Solve{*}: Cone-of-Influence로 불필요한 쿼리를 제거하고, 포인터 추상화 적용 후 Z3에 전달
+
+h3. 2.2 3대 기술 요소
+
+||기술||역할||참신성 평가||
+|Per-Transition COI|개별 transition 단위로 Cone-of-Influence 적용 — 전통적 프로그램 단위 COI보다 tight한 pruning 달성|중(기법 자체는 수십 년 전부터 존재, transition 단위 적용이 점진적 개선)|
+|Pointer Abstraction|비트 레벨 포인터 연산({{pte & PG_MASK}})을 추상 속성 접근({{pte.addr}})으로 치환하여 Z3 bit-vector theory 회피|중하(SMACK·SeaHorn의 메모리 분할 기법과 유사 계열)|
+|Z3 Query Caching|유사 경로에서 생성되는 SMT formula와 결과 재사용|하(Boogie/Dafny에 이미 존재)|
+
+{note:title=기술적 위치}
+개별 기법은 각각 기존 연구에 선례가 있다. Spoq2의 기여는 {*}이들을 조합하여 "무수정 C + 자동화 + 보안 속성"이라는 세 조건을 동시에 만족시킨 최초 시스템{*}이라는 엔지니어링적 완성도에 있다.
+{note}
+
+h3. 2.3 지원 가능한 보안 속성
+
+Inductive invariant로 환원 가능한 모든 속성을 지원한다.
+
+* Safety properties (크래시 없음, 불변조건 유지)
+* Noninterference (비밀 데이터가 공개 채널로 유출되지 않음)
+* Confidentiality, Integrity
+* Relaxed Noninterference
+* Step Consistency
+* k-Safety Hyperproperties
+
+{*}지원 불가{*}: Availability, Liveness(DoS 저항성 등). 이는 inductive invariant로 환원되지 않는 속성이기 때문.
+
+----
+
+h2. 3. 연구 계보 및 신뢰도
+
+h3. 3.1 ASPLOS 2026 Best Paper Honorable Mention
+
+ASPLOS는 시스템·아키텍처·프로그래밍언어 교차 영역의 최상위 ACM 학회이다. Spoq2는 2026년 152편 accept 중 {*}16편 Best Paper Honorable Mention{*}에 선정됐다(비율 약 10.5%). 시스템 탑-티어 학회가 형식 검증 연구 궤도를 공식적으로 인정한 신호로 해석된다.
+
+h3. 3.2 저자 프로필
+
+||저자||소속||핵심 이력||
+|Ronghui Gu|Columbia, Tang Family Associate Professor|CertiKOS(OSDI '16 Jay Lepreau Best Paper) 주저자, {*}CertiK 공동창업자{*}(Web3 보안 유니콘, 기업가치 $20억, 1,800+ 클라이언트), NSF CAREER, VMware Research Award|
+|Jason Nieh|Columbia CS 정교수|AAAS·ACM·IEEE·Guggenheim Fellow 4관왕, {*}KVM/ARM 하이퍼바이저 설계자{*}(Linux 공식 채택), SeKVM 공동저자, SOSP·OSDI Best Paper 다수|
+|Ganxiang Yang, Wei Qiang, Yi Rong|Columbia PhD 과정 (공동 1저자)|Spoq2 구현·평가 주도, 후속 연구 활발|
+
+h3. 3.3 Spoq (OSDI 2023) → Spoq2 (ASPLOS 2026) 진화
+
+||항목||Spoq (OSDI '23)||Spoq2 (ASPLOS '26)||
+|대상 속성|정확성, 기능 명세|{*}보안 속성 (noninterference 등){*}|
+|증명 엔진|Coq 기반 정제 증명 자동생성|SMT solver 기반 inductive invariant 확립|
+|C 코드 수정|일부 수정 허용|{*}미수정 실제 코드{*} 직접 검증|
+|핵심 기법|LLVM IR → Coq AST 변환, 레이어 증명|Per-transition COI + 포인터 추상화|
+|실증 규모|기존 코드베이스 (SeKVM 포함)|{*}4개 실세계 코드베이스{*} 검증, 알려지지 않은 버그 2건 발견|
+
+h3. 3.4 자금 출처
+
+공식 확인된 연구비: {*}NSF{*} (CCF-1918400, CNS-2052947, CCF-2124080), {*}DARPA{*} (N66001-21-C-4018), {*}Arm{*}, Amazon Research Awards. 미 국방·연구재단 + Arm 본사 직접 후원이라는 조합 자체가 이 라인의 전략적 중요도를 시사한다.
+
+----
+
+h2. 4. 검증 대상 및 정량 성과
+
+h3. 4.1 검증한 실제 시스템
+
+||대상||설명||의미||
+|TF-RMM v0.3.0|Arm CCA의 Realm Management Monitor|Arm v9 기밀 컴퓨팅의 핵심 펌웨어. 상용 배포 대상 코드|
+|TF-A v2.13|Arm-A 프로세서 EL3 보안 펌웨어|부팅·보안 세계 전환 담당. 전 Arm 서버/모바일 공통|
+|SeKVM (Linux 6.1)|Linux KVM 기반 보안 하이퍼바이저|클라우드 하이퍼바이저로 실제 채택 이력|
+|Komodo|보안 모니터|연구용 보안 모니터 레퍼런스|
+
+h3. 4.2 정량 성과
+
+||지표||기존 (Spoq / 수동 Coq)||Spoq2||
+|수동 작성 코드|수천 줄의 증명 스크립트|200줄 미만의 invariant 정의 ({*}최대 80% 감소{*})|
+|검증 소요 시간|수일 타임아웃 빈발|수 분 이내 완료|
+|발견한 실제 버그|-|SeKVM Linux 6.1 포트에서 {*}락 누락 버그 2건{*} 식별·수정|
+|코드 수정 필요 여부|Spoq 선행 연구도 일부 필요|{*}원본 무수정{*}|
+
+h3. 4.3 실제 발견 버그 — 신뢰성 증거
+
+SeKVM을 Linux 6.1로 포팅하는 과정에서 Spoq2가 {*}guest page table에 락 없이 접근하는 2건의 경쟁 조건{*}을 발견했다. 이는 형식 검증이 단순 증명 자동화에 그치지 않고 실제 상용 코드의 결함 발견에 기여한다는 직접 증거다. 개발팀이 수정을 확인했다.
+
+----
+
+h2. 5. 코드 분석 — 실제 사용 흐름
+
+오픈소스 저장소: [https://github.com/VeriGu/spoq2|https://github.com/VeriGu/spoq2] (커밋 779, C++ 78% + Coq 15% + Python 2%). 아티팩트: [https://github.com/VeriGu/spoq2-artifacts|https://github.com/VeriGu/spoq2-artifacts].
+
+h3. 5.1 실행 방법
+
+{code:language=bash}
+# Docker 환경 (권장)
+docker load -i spoq2_artifact.tar
+docker run -it spoq2 bash
+
+# 컨테이너 내부 — TF-RMM 검증
+cd /opt/spoq2/spoq2-artifacts/rmm-pa/
+python3 run.py
+
+# Native 빌드 (Z3 4.12.5 + LLVM 14.0.0 + Boost + C++17 필요)
+cmake -DZ3_DIR=/path/to/z3 .. && ninja
+./build/spoq test.v --llvm --check-simulation --race --new-trans
+{code}
+
+{{run.py}}는 TF-RMM의 36개 transition을 순회하며 {{spoq}} 바이너리를 반복 호출하고, ablation 실험 결과를 {{ablation.csv}}에 기록한다. {{--variant 1~6}} 플래그로 COI·Path Pruning·Expr Cache 최적화를 개별 비활성화할 수 있다.
+
+h3. 5.2 입력 파일 구조 (TF-RMM artifact)
+
+||파일||역할||
+|rmm-opt.ll / rmm-opt.bc|TF-RMM C 소스에서 추출한 LLVM IR (검증 대상)|
+|rmm-opt.unroll.ll|루프 언롤링 적용 버전|
+|test.v|최상위 Coq 스펙 (invariant, simulation 관계 정의)|
+|test_machine.v|머신 상태 모델 — 레지스터·메모리 구조|
+|test_ptr.v|포인터 추상화 정의|
+|test_iasm.v|인라인 어셈블리 모델|
+|test_verify.v|검증 목표(property) 진술|
+
+h3. 5.3 핵심 입력 예시 — Coq 머신 모델
+
+{code:language=text}
+(* PerCPU: 프로세서별 상태 — EL2/EL12/EL1 레지스터 번들 *)
+Record PerCPU := {
+  regs : PerCPURegs;   (* EL별 시스템 레지스터 *)
+  gpregs : GPRegs;     (* X0~X30, LR *)
+  tlb_cache : TLBCache
+}.
+
+(* Shared: 시스템 전역 자원 *)
+Record Shared := {
+  glk     : LockMap;      (* 스핀락 맵 *)
+  gpt     : GPT;          (* Granule Protection Table *)
+  granules: GranuleMeta;  (* 4KB 메모리 그래뉼 메타 *)
+  granule_data : GranuleStore
+}.
+{code}
+
+h3. 5.4 Python 실행 스크립트 핵심 구성
+
+{code:language=python}
+base_flags = [
+    "--llvm", "--new-trans", "--transform-io",
+    "--race",              # 멀티 SMT 솔버 병렬화
+    "--check-simulation",  # 시뮬레이션 관계 검증
+    "--no-profile",
+]
+# 각 transition마다 --target-transition={name} 추가, 총 36회 호출
+{code}
+
+h3. 5.5 저장소 상태
+
+||항목||상태||
+|총 커밋|779회, 최근 커밋 2026-03-25(ASPLOS 발표 직전)|
+|기여자|arxgy, glassesq, XuhengLi 등 최소 4~5인|
+|Star / Fork|14 / 0 (연구 아티팩트 특성)|
+|문서화|README 상세 — Quick Start, 의존성 버전, CLI 플래그, 인용 정보 모두 포함|
+|라이선스|명시적 LICENSE 파일 미확인 — 연구용 공개 코드로 추정, 상업 사용 전 저자 문의 필요|
+
+----
+
+h2. 6. SE(Software Engineering) 관점 리뷰
+
+본 섹션은 Spoq2를 소프트웨어 품질 속성(quality attributes) 기준으로 평가한다. 과장 없는 냉정한 판단이 경영 의사결정에 필요하다는 관점에서 접근했다.
+
+h3. 6.1 자동화의 실제 경계
+
+"Highly automated"라는 논문의 표현은 정확하지만, 사람이 여전히 수행해야 하는 작업이 명확히 존재한다.
+
+||사용자 수동 입력||비고||
+|Machine configuration|추상 머신 상태 정의 (Coq 레코드)|
+|Pointer configuration|포인터 비트 범위 매핑|
+|Inductive invariant 정의|{*}가장 노동집약적{*} — 논문 자체가 인정|
+|Loop invariant + ranking function|루프 종료 증명용|
+|Layer 구조 설정|계층 정제 관계|
+
+{warning:title=평가 기준의 한계}
+"수동 증명 수천 줄 → 200줄 미만" 비교는 {*}최종 산출물 LoC{*} 기준이다. invariant를 처음 작성할 때의 시행착오, 디버깅 반복, inductive하지 않아서 재정의하는 과정의 공수는 누적 집계되지 않는다. 따라서 실제 엔지니어링 공수 절감은 80%보다는 보수적으로 보아야 한다.
+{warning}
+
+h3. 6.2 Soundness vs Completeness
+
+||속성||평가||의미||
+|Soundness (건전성)|{color:#22c55e}{*}이론적 보장 있음{*}{color} — COI는 보수적, 포인터 추상화는 Z3 동치 확인 시에만 적용|"검증 통과 = 안전"이라는 주장이 유효|
+|Completeness (완전성)|{color:#f97316}{*}부분적{*}{color} — 실제로는 안전한데 증명 실패(false positive) 발생 가능|검증 실패 원인이 "진짜 버그" vs "도구 한계"인지 엔지니어가 구분해야 함|
+
+{*}SE 관점의 핵심 질문{*}: Z3가 반환하는 counterexample의 가독성과 actionability는 논문에 정량 기술이 없다. 실무 투입 시 "검증 실패 원인 분석 역량"이 별도 스킬로 요구된다.
+
+h3. 6.3 TCB(Trusted Computing Base) 크기 — 신뢰 체인의 실질적 취약점
+
+형식 검증의 가치는 "TCB가 얼마나 작은가"에 달려 있다. Spoq2의 TCB를 나열하면:
+
+* Clang / LLVM 컴파일러 (수백만 LoC)
+* LLVM IR → Coq 번역기
+* Coq proof assistant
+* Z3 SMT solver
+* Spoq2 COI proof checker
+* 사용자 정의 configuration + invariant
+
+{warning:title=실질적 리스크 — Clang/LLVM이 TCB에 포함됨}
+CompCert 같은 {*}검증된 컴파일러{*}가 아니라 일반 Clang을 사용한다. 따라서 컴파일러의 Undefined Behavior 처리 오류나 LLVM 최적화 버그(Alive2 도구가 다수 발견한 바 있음)가 존재하면, Coq 증명 이전 단계에서 이미 코드 의미가 오염될 수 있다.
+
+"무수정 시스템 소프트웨어를 검증한다"는 주장의 정확한 의미는 {*}"Clang이 해석한 LLVM IR 표현을 검증한다"{*}이다. Translation validation이나 proof-producing 변환이 부재한 현 구조에서는 foundational verification이라기보다는 "mechanized bug-finder" 성격에 가깝다.
+
+Z3 proof certificate를 검증하지 않으면 Z3 자체도 TCB에 포함된다.
+{warning}
+
+h3. 6.4 Scalability — 실제 적용 범위
+
+||차원||평가||
+|Path explosion|COI pruning으로 완화되나 보수적. 복잡 분기 코드에서 여전히 병목 가능|
+|검증 대상 규모|보안 모니터·하이퍼바이저(수천~수만 LoC) 범위에 최적화|
+|범용 커널 확장 (리눅스 전체 등)|{color:#ef4444}{*}비현실적{*}{color} — MS SDV(2025 EOL)도 드라이버 1개 단위였음|
+|Concurrency 모델|Sequentially Consistent 기반. Arm 실제 하드웨어의 relaxed memory model 확장은 논문이 "향후 과제"로 언급|
+|동적 메모리 할당, inline asm, DMA/MMIO|부분 지원. 일반 시스템 코드에서의 견고성 미검증|
+
+h3. 6.5 유지보수성 (Maintainability)
+
+시스템 소프트웨어는 지속 변경된다. Spoq2는 "변경분만 재생성" 구조를 제공하나, 증명 체인의 전파 범위(granularity)가 논문 상 명확하지 않다.
+
+* {*}긍정 신호{*}: SeKVM Linux 6.1 포트 시 재검증이 실제로 수행됐고 그 과정에서 버그를 발견함 → incremental verification이 동작한다는 증거
+* {*}우려 신호{*}: 함수 1개 수정 시 전체 invariant 체인이 깨지는 빈도, CI/CD 파이프라인 통합 가능 수준(분 vs 시간)에 대한 정량 데이터 부재
+* {*}Spec drift{*}: 커널/펌웨어 버전이 올라갈 때마다 invariant를 유지보수하는 "proof 부채"가 누적된다. 이 부채의 상각 비용이 장기적으로 가장 큰 운영 리스크
+
+h3. 6.6 적용 범위의 구조적 제약
+
+||제약||영향||
+|Availability / Liveness 미지원|DoS 저항성 증명 불가 — 실전 보안에서 큰 gap|
+|Concurrency는 DRF-first 전략|Data Race Freedom을 safety로 먼저 증명한 뒤 sequential reasoning — 엄격한 선행 조건 필요|
+|Inductive invariant 정의 역량|시스템 내부 + 형식 기법 양쪽을 이해하는 인력이 필요. 국내외 공통 희소|
+
+h3. 6.7 SE 종합 평가표
+
+||품질 속성||등급||요지||
+|Correctness(증명 자체)|A|Soundness 이론적으로 보장|
+|Automation 수준|B+|기계 가능한 부분은 자동화, 사양 작성은 수동|
+|Scalability|B-|보안 모니터급까지, 범용 커널 확장은 여전히 연구 수준|
+|Trustworthiness (TCB)|B|Clang/LLVM/Z3 의존이 실질적 취약점|
+|Maintainability|B-|spec drift에 대한 장기 비용 불확실|
+|Toolability / Integrability|C+|Docker 제공이 긍정, 운영 환경 통합 가이드 부재|
+|Talent availability|C|형식 기법 인력 풀이 전 세계적으로 제한|
+
+----
+
+h2. 7. DevOps 관점 — 파이프라인 통합과 운영
+
+본 섹션은 Spoq2를 개발 운영 체계에 편입할 때의 실무적 고려사항을 정리한다.
+
+h3. 7.1 CI/CD 통합 전략
+
+||트리거 시점||적합성||근거||
+|커밋 단위 (pre-merge)|{color:#ef4444}{*}부적합{*}{color}|검증 소요가 대상별 수십 분~수 시간. 커밋 리드타임을 파괴|
+|Nightly 배치|{color:#22c55e}{*}적합{*}{color}|일 1회 전체 재검증, 결과를 대시보드에 축적|
+|릴리즈 게이트 (pre-release)|{color:#22c55e}{*}적합{*}{color}|보안 크리티컬 브랜치의 릴리즈 전 수동 트리거|
+|Hotfix 응답|조건부|변경 영향 범위가 좁을 때만 incremental 활용|
+
+h3. 7.2 품질 게이트 내 포지셔닝
+
+기존 품질 게이트(정적 분석, 커버리지, 아키텍처 메트릭, 테스트)와 Spoq2는 {*}동일 계층이 아니다{*}. Spoq2는 "적용 가능한 코드 영역에 한해" 동작하는 조건부 게이트이며, 모든 프로젝트 공통 RC에 강제하면 정합성이 깨진다.
+
+{*}권장 포지셔닝{*}: Optional, Scoped Security Assurance Gate
+- 보안 크리티컬 모듈(부트로더, TEE, 하이퍼바이저 등)에만 적용 대상 지정
+- 적용 대상이면 릴리즈 RC 필수 조건화
+- 비적용 영역은 기존 품질 게이트로 유지
+
+h3. 7.3 대시보드 / 관측성 요구사항
+
+Spoq2 결과를 운영 체계에 통합할 때 필요한 최소 관측 지표:
+
+||지표||의미||
+|Last-Proof Status|모듈별 최근 검증 통과/실패|
+|Verification Duration Trend|검증 소요 시간 추이 — 증가 시 spec drift 경고 신호|
+|Unverified Commits|마지막 검증 이후 쌓인 미검증 커밋 수|
+|Invariant Change Frequency|invariant 정의 수정 빈도 — proof 부채 지표|
+|Counterexample Archive|검증 실패 시 Z3 반례 누적 저장 — 반복 학습 자료|
+
+h3. 7.4 운영 리스크
+
+||리스크||대응||
+|LLVM 14 고정 의존|상위 버전 Clang 사용 프로젝트와 도구 체인 분리 필요|
+|Coq / Rocq 버전 결속|Spoq2는 특정 Coq 버전 가정. 자체 언어 생태계로 관리해야 함|
+|Proof 부채 누적|커널 업데이트마다 invariant 재검증. 전담 유지보수 인력 필요|
+|Docker 이미지 대형|Z3 + LLVM + Coq 전체를 포함, 수 GB 규모. CI 캐시 전략 필수|
+
+h3. 7.5 조직 도입 3단계 로드맵 (일반화)
+
+SWDP 등 특정 조직 특화가 아닌, 형식 검증을 처음 도입하는 조직에 공통 적용 가능한 단계로 정리한다.
+
+||단계||기간||범위||산출물||
+|PoC|3~6개월|논문 artifact(TF-RMM 등) 재현, 내부 1개 모듈 예비 적용|Feasibility 리포트, 기술 위험 평가|
+|Pilot|6~12개월|보안 크리티컬 브랜치 1~2개에 Nightly 적용|실 버그 발견 실적, RC 연동 체계|
+|Standardization|12~24개월|Security-critical 프로젝트 RC 필수화, 가이드라인 표준화|Proof 유지보수 체계, 사내 역량 축적|
+
+{info:title=Apple·Arm 선례}
+형식 검증을 실전 도입한 기업들은 공통적으로 {*}"좁은 속성 1개부터"{*} 접근한다. Apple A13 Secure Enclave의 PKA 검증, Arm의 Cortex 프로세서 formal sign-off 등이 사례다. 처음부터 전 제품에 적용하려는 시도는 예외 없이 실패한다.
+{info}
+
+----
+
+h2. 8. 경쟁 환경
+
+h3. 8.1 주요 비교 대상
+
+||도구||접근 방식||Spoq2와의 차이||
+|seL4 (UNSW/CSIRO)|Isabelle/HOL 수작업 증명|세계 최고 수준 완성도, 그러나 수십 인년 투입. 수정 코드 + 수작업|
+|CertiKOS (Yale/Columbia)|Coq 신규 코드 작성|Spoq2 저자의 선행 작품. 특수 목적 언어, 기존 C 코드 직접 적용 불가|
+|Serval (UW)|Rosette symbolic evaluation|Spoq2가 직접 비교한 선행 도구. Concurrency 미지원, spec 3.1K LoC 필요|
+|AWS Kani|Rust bounded model checker|Rust 전용, 메모리 안전성 중심. Firecracker 적용|
+|AWS Dafny|Verification-aware DSL|IAM 엔진 재구현에 사용. 신규 코드 필요, 기존 C 소급 적용 불가|
+|Meta Infer|Separation Logic static analyzer|C/C++ 메모리/null 오류. {*}보안 속성(noninterference) 미지원{*}|
+|Microsoft Dafny/Ivy|Verification-aware 언어|신규 코드 작성 방식, 기존 C 소급 적용 불가|
+
+h3. 8.2 Spoq2의 고유 포지션
+
+아래 세 조건을 {*}동시에{*} 만족하는 공개 프레임워크는 현재 Spoq2가 유일하다.
+
+# 무수정 기존 C 코드 대상
+# 자동화된 증명 생성
+# 보안 속성(noninterference 등) 지원
+
+seL4는 (1)을 만족하지 못하고(수작업 + 수정), CertiKOS/Dafny는 (1)을 구조적으로 불가능하게 하며(신규 언어), Serval은 (3)의 범위가 좁고, Kani/Infer는 (3) 대신 메모리 버그 탐지에 집중한다.
+
+h3. 8.3 Arm CCA 검증 레퍼런스
+
+* Columbia × Arm 협업(2022~)으로 CCA RMM 최초 형식 검증 완료
+* Manchester University + ESBMC (SAS 2024): RMM 일부 구성 요소 모델체킹
+* Arm 본사는 CCA 보안을 마케팅 포인트로 강조하나, 전체 스택 end-to-end 검증을 공식 선언한 바는 없음
+
+Spoq2는 이 레퍼런스 흐름을 자동화·실용화 단계로 밀어올린 성과에 해당한다.
+
+----
+
+h2. 9. 비즈니스 맥락 — 시장·규제·인력
+
+h3. 9.1 규제 환경의 방향성
+
+||규제||시행·강화 시점||요점||
+|HIPAA 2026 (미국 의료)|2027년 초|정책 선언 → 기술적 통제의 증명 의무화로 전환|
+|EU DORA (금융)|2025~26 본격 시행|공급망 SW 신뢰성 요구 하드 규정화|
+|EU AI Act (고위험 AI)|2026 단계적|감사 가능성(auditability) 요구 — 형식 검증이 증거 역할|
+|美 NDAA FY2026 (방산)|2026-06|방산 사이버보안 요건 표준화 의무화|
+
+공통 방향은 {*}"정책 선언"에서 "증명된 보증(provable assurance)"으로의 이동{*}이다. 이 흐름은 Spoq2 같은 자동 검증 도구의 수요 기반이 된다.
+
+h3. 9.2 도입 비용 (참고치)
+
+||항목||규모||연간 비용 (미국 기준)||
+|형식 검증 엔지니어|2~3명|인당 $250K~$480K (시니어)|
+|시스템 보안 엔지니어|3~5명|인당 $180K~$250K|
+|학계 파트너십|Columbia 등|$300K~$1M/년|
+|{*}1차 연도 총액{*}|-|{*}$2M~$5M 수준{*}|
+
+한국 기준 인건비는 미국의 40~60% 수준. 다만 {*}국내 형식 검증 전문가 풀이 극도로 작다{*}는 점이 최대 병목이다. 대학원 연구실 연계 또는 해외 채용이 실질적 대안이다.
+
+h3. 9.3 전략적 함의 (3~5년 관점)
+
+* {*}단기(1~2년){*}: Azure Cobalt 200 GA로 CCA 탑재 서버가 유통되기 시작. TF-RMM 신뢰성이 클라우드 공급망 감사 항목으로 편입될 가능성 높음
+* {*}중기(3년){*}: EU AI Act·DORA 본격 시행 + HIPAA 강화로 {*}형식 검증 기반 보안 보증이 계약 조건으로 명시{*}될 가능성
+* {*}장기(5년){*}: 오픈소스 확산과 함께 "검증된 SW 스택"이 기밀 컴퓨팅의 사실상 기준이 될 것. 미채택 시 공공·금융 입찰에서 불리
+
+----
+
+h2. 10. 리스크 및 한계 총정리
+
+||분류||리스크||완화 방향||
+|기술|Clang/LLVM/Z3 TCB 취약점|Translation validation 추가 적용, Z3 proof certificate 검증|
+|기술|Availability/Liveness 미지원|런타임 모니터링 도구와 병행 운영|
+|기술|Concurrency는 DRF-first 제약|Weak memory model 확장 연구 진행 대기|
+|인력|형식 기법 + 시스템 전문가 희소성|학계 파트너십 + 해외 채용 + 사내 장기 양성|
+|운영|Proof 부채 누적 (spec drift)|invariant 변경 빈도 지표화 + 전담 유지보수 조직|
+|제도|라이선스 미명시|상업 적용 전 저자 문의 필수|
+|도구|LLVM 14 버전 고정|도구 체인 격리 전략 — Docker 기반 Pin|
+|관리|"검증 통과 = 절대 안전" 오인|RC 문구에 scope 명확 기재 (검증 범위·제외 속성)|
+
+----
+
+h2. 11. 결론 및 경영 권고
+
+{panel:title=핵심 결론|titleBGColor=#92400e|titleColor=#ffffff|bgColor=#fffbeb|borderColor=#92400e}
+# Spoq2는 {*}"무수정 C + 자동화 + 보안 속성"{*} 세 조건을 동시에 만족하는 현재 유일한 공개 프레임워크이며, Arm CCA 보안 스택의 실제 상용 코드에 적용돼 {*}미지의 버그를 발견{*}한 실용성 증거를 제시했다
+# 그러나 "완전 자동화"가 아니다. Invariant 정의라는 고숙련 수동 작업이 남아 있으며, 이 단계의 인력 수급이 조직 도입의 병목이다
+# TCB에 Clang/LLVM/Z3가 포함되어 {*}foundational verification이라기보다는 mechanized bug-finder 성격{*}에 가깝다는 점을 정확히 인식해야 한다
+# 보안 모니터·하이퍼바이저급 범위(수천~수만 LoC)에서는 실전 적용 가능, 범용 커널 전체는 여전히 비현실적이다
+{panel}
+
+h3. 11.1 권고 액션 (우선순위 순)
+
+# {*}즉시{*}: Spoq2 논문 원문 및 오픈소스 저장소에 대한 내부 기술 검토 착수 (엔지니어링 1~2주)
+# {*}1개월 내{*}: Columbia 연구팀 접촉 — 라이선스 조건 문의, 기술 파트너십 가능성 탐색
+# {*}3~6개월{*}: PoC — Docker 기반 artifact 재현, 사내 1개 보안 크리티컬 모듈 예비 적용. 예산 $1M~$2M 수준
+# {*}6~12개월{*}: Pilot 결정 — PoC 결과에 기반해 1~2개 실제 브랜치에 Nightly 적용 여부 판단
+# {*}장기{*}: 검증 기반 보안 보증을 금융·공공 고객 제안서의 차별화 포인트로 명시
+
+h3. 11.2 의사결정 포인트
+
+||질문||경영 판단 필요 영역||
+|사내 보안 크리티컬 코드 중 1순위 적용 대상이 있는가?|제품 포트폴리오 검토|
+|형식 검증 인력 확보 경로(학계 협업 vs 해외 채용)는?|HR 전략|
+|연간 $2~5M 수준 투자의 ROI 회수 창구는 어디인가?|규제 대응 가치 vs 시장 차별화 가치 저울질|
+|proof 부채를 장기 유지할 조직적 의지가 있는가?|5년 이상의 커미트먼트 필요|
+
+----
+
+h2. 12. 참고 자료 및 상세 정보
+
+{expand:title=원문 및 공식 자료 — 6개 링크}
+* [Spoq2 논문 PDF (Columbia)|http://www.cs.columbia.edu/~nieh/pubs/asplos2026_spoq2.pdf]
+* [Columbia Engineering 공식 보도자료|https://www.engineering.columbia.edu/about/news/new-tool-automates-formal-verification-systems-software]
+* [ASPLOS 2026 Awards|https://www.asplos-conference.org/asplos2026/awards/index.html]
+* [Ganxiang Yang 홈페이지 (공동 1저자)|https://arxgy.github.io]
+* [Ronghui Gu 홈페이지 (교신저자)|https://www.cs.columbia.edu/~rgu/]
+* [선행 연구 Spoq (OSDI '23)|https://www.usenix.org/conference/osdi23/presentation/li-xupeng]
+{expand}
+
+{expand:title=오픈소스 저장소 구조 — spoq2 + spoq2-artifacts (커밋 779, 기여자 4~5인)}
+{code:language=text}
+spoq2/
+├── src/                  # C++ 78% — LLVM IR 파서, COI 분석기, SMT 쿼리 생성
+├── coqlib/LayerSem/      # Coq 15% — 계층 의미론 증명 라이브러리
+├── scripts/              # Python 2% — 빌드 보조, 결과 파싱
+├── include/              # C++ 헤더
+├── docs/doxygen.config   # API 문서 생성 설정
+└── .github/workflows/    # CI 파이프라인
+
+spoq2-artifacts/
+├── rmm-pa/               # TF-RMM (Arm Realm Management Monitor)
+├── tfa/                  # TF-A (Arm-A EL3 보안 펌웨어)
+├── sekvm/, sekvm-6.1/    # SeKVM 하이퍼바이저 (Linux 6.1 포함)
+├── pkvm/                 # Protected KVM
+├── kvm-pgtable/          # KVM 페이지 테이블
+└── tpot/                 # Komodo 보안 모니터
+{code}
+{expand}
+
+{expand:title=Spoq2 주요 CLI 플래그 — 8개 옵션}
+||플래그||의미||
+|--llvm|LLVM IR 입력 모드|
+|--new-trans|새로운 transition 분해 엔진 사용|
+|--transform-io|I/O 변환 적용|
+|--race|멀티 SMT solver 병렬 실행|
+|--check-simulation|시뮬레이션 관계 검증|
+|--no-profile|프로파일링 비활성 (속도 향상)|
+|--target-transition={name}|특정 transition만 검증|
+|--variant 1~6|ablation 실험용 최적화 비활성화|
+{expand}
+
+{expand:title=형식 검증 용어 정리 — 8개 핵심 용어}
+||용어||설명||
+|Formal Verification|수학적 증명으로 프로그램이 명세를 만족함을 보이는 기법|
+|Inductive Invariant|초기 상태에서 참이고, 모든 transition을 통해 보존되는 조건|
+|Noninterference|비밀 데이터가 공개 관찰자에게 영향을 주지 않는 보안 속성|
+|Cone-of-Influence (COI)|출력에 영향을 주는 입력·변수의 부분집합 — 나머지는 분석에서 제외 가능|
+|SMT Solver|Satisfiability Modulo Theories. Z3가 대표|
+|TCB|Trusted Computing Base — 신뢰해야 정당성이 성립하는 구성 요소 집합|
+|Refinement|추상 명세가 구체 구현에 의해 실현됨을 보이는 증명 기법|
+|Hyperproperty|단일 실행이 아닌 복수 실행 간 관계로 정의되는 속성 (noninterference 등)|
+{expand}
+
+{expand:title=Arm CCA 스택 배경 — 5개 컴포넌트}
+||컴포넌트||역할||
+|BL1/BL2/BL31 (TF-A)|부트체인. BL31이 Secure Monitor(EL3)로 상주|
+|RMM (TF-RMM)|Realm Management Monitor — CCA의 신뢰 실행 환경 관리자|
+|RME (하드웨어)|Realm Management Extension — Armv9-A 확장|
+|Granule Protection Table|메모리 보호 권한 테이블|
+|Realm|격리된 실행 환경 (Confidential VM)|
+{expand}
+
+----
+
+{info:title=문서 정보}
+* {*}작성{*}: 본 보고서 작성자
+* {*}작성일{*}: 2026-04-15
+* {*}분류{*}: 기술 동향 분석 / 임원 보고용
+* {*}신뢰도{*}: 원문·공식 자료 기반 High. 시장 전망 수치는 복수 출처 교차 확인
+* {*}재검토 권장 시점{*}: ASPLOS 2026 후속 발표(2026-07), Azure Cobalt 200 GA 시점(2026 하반기)
+{info}
